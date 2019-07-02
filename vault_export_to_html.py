@@ -71,7 +71,7 @@ def get_commandline_arguments():
     parser.add_argument("engine", help="path of the secret engine in vault")
     parser.add_argument(
         "vaultpath",
-        help="path where to put the passwords inside the secret engine vault",
+        help="path where to find the passwords inside the secret engine vault",
     )
     parser.add_argument("--logfile", help="path to a file the output is passed to")
     group = parser.add_mutually_exclusive_group()
