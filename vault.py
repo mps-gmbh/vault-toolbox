@@ -229,7 +229,7 @@ def _requests_request(*args, **kwargs):
 
     """
     # key_path = os.path.abspath("lets-encrypt-x3-cross-signed.pem.txt")
-    key_path = os.path.abspath("./vault_chemocompile_de.crt")
+    key_path = os.path.abspath("./ca_bundle.crt")
     kwargs["verify"] = key_path
     logging.debug(kwargs)
     logging.debug(args)
