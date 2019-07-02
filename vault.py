@@ -82,14 +82,15 @@ class Vault:
         :returns: Password of the user
 
         """
-        password = self._add_userpass_login(lastname.lower(), password)
+        username = firstname.lower() + "." + lastname.lower()
+        password = self._add_userpass_login(username, password)
         metadata = {
             "name": firstname + " " + lastname,
             "metadata": {"organization": "MPS GmbH"},
             "policies": ["base"],
         }
         entity_id = self._add_entity(metadata)
-        self._add_alias(lastname.lower(), entity_id)
+        self._add_alias(username, entity_id)
         return password
 
     def _add_userpass_login(self, username, password=None):
@@ -203,13 +204,12 @@ class Vault:
         return data
 
 
-def unwrap_str(token):
-    """ Generates an unwrap commanline that can be used to unwrap the token.
-    :token: token to unwrap
-    :returns: unwrap commandline
-
-    """
-    return "./vault_unwrap.py " + token
+    def unwrap_str(self, token):
+        """ Generates an unwrap commanline that can be used to unwrap the token.
+        :token: token to unwrap
+        :returns: unwrap commandline
+        """
+        return "VAULT_ADDR=" + self.vault_adress + " ./vault_unwrap.py " + token
 
 
 def _normalize(path):

@@ -12,7 +12,6 @@ import os
 
 from init_logging import init_logging
 from vault import Vault
-from vault import unwrap_str
 
 
 def main():
@@ -29,7 +28,7 @@ def main():
     vault = Vault(os.environ["VAULT_ADDR"], args.token)
     password = vault.add_user(args.firstname, args.lastname)
     token = vault.wrap({"password": password})
-    unwrap = unwrap_str(token)
+    unwrap = vault.unwrap_str(token)
     print(unwrap)
 
 
