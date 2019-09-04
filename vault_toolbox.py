@@ -1,17 +1,12 @@
 #!/usr/bin/python3
 """
-This module adds a user, wrapps the password and returns a curl command with
-which the password can be retrieved once.
-
-Author: Janosch Deurer
-
+doc
 """
 import logging
 import argparse
-import os
 
-from init_logging import init_logging
-from vault import Vault
+import init_logging
+import unwrap
 
 
 def main():
@@ -19,14 +14,13 @@ def main():
     :returns: None
 
     """
-
     # Initialize Logging
     logging.basicConfig(level=logging.DEBUG)
     args = get_commandline_arguments()
-    init_logging(args)
+    init_logging.init_logging(args)
+    args.func(args)
 
-    vault = Vault(os.environ["VAULT_ADDR"], args.token)
-    print(vault.unwrap())
+
 
 
 def get_commandline_arguments():
@@ -35,7 +29,6 @@ def get_commandline_arguments():
 
     """
     parser = argparse.ArgumentParser()
-    parser.add_argument("token", help="Vault token")
     parser.add_argument("--logfile", help="path to a file the output is passed to")
     group = parser.add_mutually_exclusive_group()
     group.add_argument(
@@ -44,6 +37,12 @@ def get_commandline_arguments():
     group.add_argument(
         "-q", "--quiet", help="no output except errors", action="store_true"
     )
+    # Add parsers for subcommand
+    subparsers = parser.add_subparsers(help="subcommand", dest='subcommand', required=True)
+    unwrap.get_commandline_parser(subparsers)
+
+    parser.add_argument("token", help="Vault token")
+
     args = parser.parse_args()
     return args
 
