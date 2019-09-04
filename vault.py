@@ -81,7 +81,6 @@ class Vault:
         for secret in self.recursive_list(engine_path, path):
             self.delete(engine_path, secret)
 
-
     def path_to_ui_link(self, engine_path, path):
         """ Generate a url from the given path
 
@@ -112,7 +111,7 @@ class Vault:
         username = firstname.lower() + "." + lastname.lower()
         password = self._add_userpass_login(username, password)
         metadata = {
-            "name": firstname + " " + lastname,
+            "name": firstname + "_" + lastname,
             "metadata": {"organization": "MPS GmbH"},
             "policies": ["base"],
         }
@@ -132,7 +131,7 @@ class Vault:
         if password is None:
             password = "".join(
                 random.SystemRandom().choice(string.ascii_letters + string.digits)
-                for _ in range(25)
+                for _ in range(16)
             )
         # Add the user in vault
         address = self.vault_adress + "/v1/auth/userpass/users/" + username
@@ -150,15 +149,36 @@ class Vault:
         request = _requests_request("LIST", address, headers=self.token_header)
         return json.loads(request.content)["data"]["keys"]
 
+    def _get_entities(self):
+        """ Get all entities in vault
+        :returns: None
+
+        """
+        address = self.vault_adress + "/v1//identity/entity/name"
+        request = _requests_request("LIST", address, headers=self.token_header)
+        logging.debug("%s %s", request.status_code, request.reason)
+        logging.debug(request.content)
+
     def del_userpass_user(self, user):
         """ Delete the given userpass user
         :returns: None
 
         """
         address = self.vault_adress + "/v1/auth/userpass/users/" + user
-        request = requests.request("DELETE", address, headers=self.token_header)
+        request = _requests_request("DELETE", address, headers=self.token_header)
         logging.debug("%s %s", request.status_code, request.reason)
         logging.debug(request.content)
+
+    def _get_entity_id(self, user):
+        """Get id for the given user
+        :returns: UserId
+
+        """
+        address = self.vault_adress + "/v1/identity/entity/name/" + user
+        request = _requests_request("GET", address, headers=self.token_header)
+        logging.debug("%s %s", request.status_code, request.reason)
+        logging.debug(request.content)
+        return json.loads(request.content)["data"]["id"]
 
     def _add_entity(self, data):
         """ Add entity to vault
@@ -174,7 +194,23 @@ class Vault:
         request = _requests_request(
             "POST", address, headers=self.token_header, data=payload
         )
-        return json.loads(request.content)["data"]["id"]
+        try:
+            user_id = json.loads(request.content)["data"]["id"]
+        except json.decoder.JSONDecodeError:
+            # If there was content, maybe this is actually an error
+            if request.content:
+                logging.exception("Error while decoding the following json:")
+                raise
+            else:
+                logging.error(
+                    "An empty response was returned, seems like the user already exists"
+                )
+                logging.debug("Loading userid manually")
+                self._get_entities()
+                print(data)
+                user_id = self._get_entity_id(data["name"])
+
+        return user_id
 
     def _add_alias(self, username, entity_id):
         """ Add an alias between the given userpass username and the given entity.
@@ -229,7 +265,6 @@ class Vault:
             data = json.loads(request.content)["errors"][0]
 
         return data
-
 
     def unwrap_str(self, token):
         """ Generates an unwrap commanline that can be used to unwrap the token.
