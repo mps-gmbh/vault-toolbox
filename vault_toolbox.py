@@ -1,12 +1,28 @@
 #!/usr/bin/python3
 """
-doc
+Commanline interface for the vault toolbox.
+
+Wrapper around the vault api. This has no claim to be a full representation of
+the api but rather to provide convenience functions that are needed by MPS GmbH.
+However, extensions are most welcome.
+
+Author: Janosch Deurer
+Mail: deurer@mps-med.de
+
 """
 import logging
 import argparse
+import os
 
 import init_logging
 import unwrap
+import export_to_html
+import list_users
+import add_user
+import del_user
+import del_secret
+import vault_import
+from vault import Vault
 
 
 def main():
@@ -18,7 +34,8 @@ def main():
     logging.basicConfig(level=logging.DEBUG)
     args = get_commandline_arguments()
     init_logging.init_logging(args)
-    args.func(args)
+    vault = Vault(os.environ["VAULT_ADDR"], args.token)
+    args.func(args, vault)
 
 
 
@@ -39,9 +56,13 @@ def get_commandline_arguments():
     )
     # Add parsers for subcommand
     subparsers = parser.add_subparsers(help="subcommand", dest='subcommand', required=True)
-    unwrap.get_commandline_parser(subparsers)
 
-    parser.add_argument("token", help="Vault token")
+    for subcommand in [unwrap, export_to_html, list_users,
+                       add_user, del_user, del_secret, vault_import]:
+        subcommand.parse_commandline_arguments(subparsers)
+
+    for _, subparser in subparsers.choices.items():
+        subparser.add_argument("token", help="Vault token")
 
     args = parser.parse_args()
     return args

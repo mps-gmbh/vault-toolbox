@@ -1,4 +1,3 @@
-#!/usr/bin/python3
 """
 This module takes a given csv keypass export and imports it in vault.
 
@@ -6,7 +5,6 @@ Author: Janosch Deurer
 
 """
 import logging
-import argparse
 import csv
 import json
 import re
@@ -14,16 +12,12 @@ import os
 import requests
 
 
-def main():
-    """Entrypoint when used as an executable
+def run(args, vault):
+    """Run this module
     :returns: None
 
     """
-
-    # Initialize Logging
-    logging.basicConfig(level=logging.DEBUG)
-    args = get_commandline_arguments()
-    initialize_logging(args)
+    # TODO: fix too many local variables
 
     # Import data from csv
     csv_input = []
@@ -97,62 +91,21 @@ def normalize(path):
     return path.replace(" ", "_").lower().replace("//", "/")
 
 
-def get_commandline_arguments():
+def parse_commandline_arguments(subparsers):
     """ Commandline argument parser for this module
-    :returns: namespace with parsed arguments
+    :returns: None
 
     """
-    parser = argparse.ArgumentParser()
+    parser = subparsers.add_parser("import")
+    parser.set_defaults(func=run)
+
+    # TODO: merge the following two arguments
     parser.add_argument("engine", help="path of the secret engine in vault")
     parser.add_argument(
         "vaultpath",
         help="path where to put the passwords inside the secret engine vault",
     )
     parser.add_argument("file", help="CSV file with keypass export")
-    parser.add_argument("--logfile", help="path to a file the output is passed to")
     parser.add_argument(
         "--dryrun", "-d", help="Only show what would be executed", action="store_true"
     )
-    group = parser.add_mutually_exclusive_group()
-    group.add_argument(
-        "-v", "--verbosity", help="increase output verbosity", action="store_true"
-    )
-    group.add_argument(
-        "-q", "--quiet", help="no output except errors", action="store_true"
-    )
-    args = parser.parse_args()
-    return args
-
-
-def initialize_logging(commandline_args):
-    """Initialize logging as given in the commandline arguments
-
-    :commandline_args: namespace with commandline arguments including verbosity
-    and logfile if given
-    :returns: None
-
-    """
-    loglevel = "INFO"
-    if commandline_args.verbosity:
-        loglevel = "DEBUG"
-    if commandline_args.quiet:
-        loglevel = "ERROR"
-
-    logfile = commandline_args.logfile
-
-    # If logfile is given, generate a new logger with file handling
-    if logfile:
-        filehandler = logging.FileHandler(logfile, "a")
-        formatter = logging.Formatter()
-        filehandler.setFormatter(formatter)
-        logger = logging.getLogger()
-        for handler in logger.handlers:
-            logger.removeHandler(handler)
-        logger.addHandler(filehandler)
-
-    loglevel = getattr(logging, loglevel.upper())
-    logging.getLogger().setLevel(loglevel)
-
-
-if __name__ == "__main__":
-    main()

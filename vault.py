@@ -145,6 +145,7 @@ class Vault:
         :returns: Users
 
         """
+        # TODO: do this with yield
         address = self.vault_adress + "/v1/auth/userpass/users"
         request = _requests_request("LIST", address, headers=self.token_header)
         return json.loads(request.content)["data"]["keys"]
@@ -271,7 +272,7 @@ class Vault:
         :token: token to unwrap
         :returns: unwrap commandline
         """
-        return "VAULT_ADDR=" + self.vault_adress + " ./vault_unwrap.py " + token
+        return "VAULT_ADDR=" + self.vault_adress + " ./vault_toolbox.py unwrap " + token
 
 
 def _normalize(path):

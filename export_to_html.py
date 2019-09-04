@@ -1,30 +1,15 @@
-#!/usr/bin/python3
 """
 This module exports a given path in vault to html
 
 Author: Janosch Deurer
 
 """
-import logging
-import argparse
-import os
-
-from init_logging import init_logging
-from vault import Vault
-
-
-def main():
-    """Entrypoint when used as an executable
+def run(args, vault):
+    """Run this module
     :returns: None
 
     """
 
-    # Initialize Logging
-    logging.basicConfig(level=logging.DEBUG)
-    args = get_commandline_arguments()
-    init_logging(args)
-
-    vault = Vault(os.environ["VAULT_ADDR"], args.token)
     secrets = vault.recursive_list(args.engine, args.vaultpath)
     path_depth = 0
     ul_count = 0
@@ -48,42 +33,29 @@ def main():
 
 
 def html_link(text, url):
-    """TODO: Docstring for html_link.
-    :returns: TODO
+    """Creates an html link element from the given text and url
+    :returns: html link element as string
 
     """
     return '<a href="' + url + '">' + text + "</a>"
 
 def html_list_element(content):
-    """TODO: Docstring for html_list_element.
-    :returns: TODO
+    """Creates an html list element from the given content
+    :returns: html list element as string
 
     """
     return "<li>" + content + "</li>"
 
-def get_commandline_arguments():
+def parse_commandline_arguments(subparsers):
     """ Commandline argument parser for this module
-    :returns: namespace with parsed arguments
+    :returns: None
 
     """
-    parser = argparse.ArgumentParser()
-    parser.add_argument("token", help="Vault token")
+    parser = subparsers.add_parser("export")
+    parser.set_defaults(func=run)
+    # TODO: merge the following two arguments
     parser.add_argument("engine", help="path of the secret engine in vault")
     parser.add_argument(
         "vaultpath",
         help="path where to find the passwords inside the secret engine vault",
     )
-    parser.add_argument("--logfile", help="path to a file the output is passed to")
-    group = parser.add_mutually_exclusive_group()
-    group.add_argument(
-        "-v", "--verbosity", help="increase output verbosity", action="store_true"
-    )
-    group.add_argument(
-        "-q", "--quiet", help="no output except errors", action="store_true"
-    )
-    args = parser.parse_args()
-    return args
-
-
-if __name__ == "__main__":
-    main()
