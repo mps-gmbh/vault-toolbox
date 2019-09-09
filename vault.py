@@ -203,6 +203,16 @@ class Vault:
         address = self.vault_adress + "/v1/auth/userpass/users/" + user
         _requests_request("DELETE", address, headers=self.token_header)
 
+    def del_entity(self, entity):
+        """Delte the given entity
+
+        :enity: Name of the entity
+        :returns: None
+
+        """
+        address = self.vault_adress + "/v1/identity/entity/name/" + entity
+        _requests_request("DELETE", address, headers=self.token_header)
+
     def get_userpass_users(self):
         """ Get all users
         :returns: Users
@@ -221,10 +231,10 @@ class Vault:
         request = _requests_request("LIST", address, headers=self.token_header)
         entity_names = json.loads(request.content)["data"]["keys"]
         for name in entity_names:
-            yield self._get_entity_by_name(name)
+            yield self.get_entity_by_name(name)
 
 
-    def _get_entity_by_name(self, name):
+    def get_entity_by_name(self, name):
         """Resolve entity name to full entity information
 
         :name: name of the entity
@@ -233,6 +243,9 @@ class Vault:
         """
         address = self.vault_adress + "/v1/identity/entity/name/" + name
         request = _requests_request("GET", address, headers=self.token_header)
+        # If user does not exist return None
+        if request.status_code == 404:
+            return None
         return json.loads(request.content)["data"]
 
 
