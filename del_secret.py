@@ -27,7 +27,6 @@ def parse_commandline_arguments(subparsers):
     parser.set_defaults(func=run)
 
     parser.add_argument("engine", help="path of the secret engine in vault")
-    # TODO: merge the following two parameters
     parser.add_argument(
         "vaultpath",
         help="path where to delete the password inside the secret engine vault",

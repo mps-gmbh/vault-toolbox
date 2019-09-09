@@ -53,7 +53,6 @@ def parse_commandline_arguments(subparsers):
     """
     parser = subparsers.add_parser("export")
     parser.set_defaults(func=run)
-    # TODO: merge the following two arguments
     parser.add_argument("engine", help="path of the secret engine in vault")
     parser.add_argument(
         "vaultpath",
