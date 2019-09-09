@@ -140,47 +140,6 @@ class Vault:
         _requests_request("POST", address, headers=self.token_header, data=data)
         return password
 
-    def get_userpass_users(self):
-        """ Get all users
-        :returns: Users
-
-        """
-        # TODO: do this with yield
-        address = self.vault_adress + "/v1/auth/userpass/users"
-        request = _requests_request("LIST", address, headers=self.token_header)
-        return json.loads(request.content)["data"]["keys"]
-
-    def _get_entities(self):
-        """ Get all entities in vault
-        :returns: None
-
-        """
-        address = self.vault_adress + "/v1//identity/entity/name"
-        request = _requests_request("LIST", address, headers=self.token_header)
-        logging.debug("%s %s", request.status_code, request.reason)
-        logging.debug(request.content)
-
-    def del_userpass_user(self, user):
-        """ Delete the given userpass user
-        :returns: None
-
-        """
-        address = self.vault_adress + "/v1/auth/userpass/users/" + user
-        request = _requests_request("DELETE", address, headers=self.token_header)
-        logging.debug("%s %s", request.status_code, request.reason)
-        logging.debug(request.content)
-
-    def _get_entity_id(self, user):
-        """Get id for the given user
-        :returns: UserId
-
-        """
-        address = self.vault_adress + "/v1/identity/entity/name/" + user
-        request = _requests_request("GET", address, headers=self.token_header)
-        logging.debug("%s %s", request.status_code, request.reason)
-        logging.debug(request.content)
-        return json.loads(request.content)["data"]["id"]
-
     def _add_entity(self, data):
         """ Add entity to vault
 
@@ -207,8 +166,6 @@ class Vault:
                     "An empty response was returned, seems like the user already exists"
                 )
                 logging.debug("Loading userid manually")
-                self._get_entities()
-                print(data)
                 user_id = self._get_entity_id(data["name"])
 
         return user_id
@@ -237,6 +194,56 @@ class Vault:
         request = _requests_request(
             "POST", address, headers=self.token_header, data=payload
         )
+
+    def del_userpass_user(self, user):
+        """ Delete the given userpass user
+        :returns: None
+
+        """
+        address = self.vault_adress + "/v1/auth/userpass/users/" + user
+        _requests_request("DELETE", address, headers=self.token_header)
+
+    def get_userpass_users(self):
+        """ Get all users
+        :returns: Users
+
+        """
+        address = self.vault_adress + "/v1/auth/userpass/users"
+        request = _requests_request("LIST", address, headers=self.token_header)
+        return json.loads(request.content)["data"]["keys"]
+
+    def get_entities(self):
+        """ Get all entities in vault
+        :returns: Iterator over entities
+
+        """
+        address = self.vault_adress + "/v1/identity/entity/name"
+        request = _requests_request("LIST", address, headers=self.token_header)
+        entity_names = json.loads(request.content)["data"]["keys"]
+        for name in entity_names:
+            yield self._get_entity_by_name(name)
+
+
+    def _get_entity_by_name(self, name):
+        """Resolve entity name to full entity information
+
+        :name: name of the entity
+        :returns: Dict with entity information
+
+        """
+        address = self.vault_adress + "/v1/identity/entity/name/" + name
+        request = _requests_request("GET", address, headers=self.token_header)
+        return json.loads(request.content)["data"]
+
+
+    def _get_entity_id(self, user):
+        """Get id for the given user
+        :returns: UserId
+
+        """
+        address = self.vault_adress + "/v1/identity/entity/name/" + user
+        request = _requests_request("GET", address, headers=self.token_header)
+        return json.loads(request.content)["data"]["id"]
 
     def wrap(self, data, ttl=600):
         """ Wrap the given data in vault

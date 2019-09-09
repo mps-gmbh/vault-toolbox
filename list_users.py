@@ -6,16 +6,28 @@ Author: Janosch Deurer
 Mail: deurer@mps-med.de
 
 """
-def run(args, vault):
+def run(_, vault):
     """Entrypoint when used as an executable
     :returns: None
 
     """
 
     users = vault.get_userpass_users()
-    # TODO: add other users
+    print("## Userpass users:\n")
     for user in users:
         print(user)
+
+
+    print("\n## Entities:\n")
+    users = vault.get_entities()
+    for user in users:
+        print(user["name"])
+
+    print("\n## Entity aliases:\n")
+    users = vault.get_entities()
+    for user in users:
+        print(user["name"] + " -> aliases:" + str([alias["name"] for alias in user["aliases"]]))
+
 
 
 def parse_commandline_arguments(subparsers):
