@@ -74,9 +74,8 @@ class Secret:
         """
         path = self.vault.normalize("/" + engine_path + "/data/" + path)
         address = self.vault.vault_adress + "/v1" + path
-        # Actually run vault
         logging.info("Adding the secret: %s", address)
-        payload = '{"data": ' + data + '}'
+        payload = json.dumps({"data": data})
         response = self.vault.requests_request("POST", address, headers=self.vault.token_header,
                                                data=payload)
         if response.json()["data"]["version"] != 1:
@@ -100,7 +99,7 @@ def add(args, vault):
     :returns: None
 
     """
-    vault.secret.add(args.engine, args.vaultpath, args.data)
+    vault.secret.add(args.engine, args.vaultpath, json.loads(args.data))
 
 def delete(args, vault):
     """Run this module

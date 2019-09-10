@@ -6,10 +6,7 @@ Author: Janosch Deurer
 """
 import logging
 import csv
-import json
 import re
-import os
-import requests
 
 
 def run(args, vault):
@@ -17,9 +14,6 @@ def run(args, vault):
     :returns: None
 
     """
-    # TODO: fix too many local variables
-    # TODO: rewrite this for vault.py
-
     # Import data from csv
     csv_input = []
     with open(args.file, newline="") as csvfile:
@@ -52,10 +46,7 @@ def run(args, vault):
         group = re.sub(r"^" + leading_path, "", row["Group"])
         # Remove spaces and double slashes
         path = normalize(
-            "/"
-            + args.engine
-            + "/data/"
-            + args.vaultpath
+            args.vaultpath
             + "/"
             + group
             + "/"
@@ -69,18 +60,9 @@ def run(args, vault):
             if row[field]:
                 new_row[field] = row[field]
         row = new_row
-        address = os.environ["VAULT_ADDR"] + "/v1" + path
-        logging.info("Creating new password")
-        logging.info("Path: %s", address)
-        data = json.dumps({"data": row})
-        logging.debug("Data: %s", data)
-        header = {"X-Vault-Token": os.environ["VAULT_DEV_ROOT_TOKEN_ID"]}
-        logging.debug("Header: %s", header)
         if not args.dryrun:
             # Acually run vault
-            request = requests.post(address, data=data, headers=header)
-            logging.info("%s %s", request.status_code, request.reason)
-            logging.debug(request.text)
+            vault.secret.add(args.engine, path, row)
 
 
 def normalize(path):
@@ -97,7 +79,7 @@ def parse_commandline_arguments(subparsers):
     :returns: None
 
     """
-    parser = subparsers.add_parser("import")
+    parser = subparsers.add_parser("import_from_csv")
     parser.set_defaults(func=run)
 
     parser.add_argument("engine", help="path of the secret engine in vault")
