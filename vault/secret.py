@@ -93,3 +93,49 @@ class Secret:
         """
         for secret in self.recursive_list(engine_path, path):
             self.delete(engine_path, secret)
+
+
+def add(args, vault):
+    """Run this module
+    :returns: None
+
+    """
+    vault.secret.add(args.engine, args.vaultpath, args.data)
+
+def delete(args, vault):
+    """Run this module
+    :returns: None
+
+    """
+    if args.recursive:
+        vault.secret.recursive_delete(args.engine, args.vaultpath)
+        return
+    vault.secret.delete(args.engine, args.vaultpath)
+
+
+
+def parse_commandline_arguments(subparsers):
+    """ Commandline argument parser for this module
+    :returns: None
+
+    """
+    # TODO: make more secret based commands
+
+    add_parser = subparsers.add_parser("secret-add")
+    del_parser = subparsers.add_parser("secret-del")
+
+    add_parser.set_defaults(func=add)
+    del_parser.set_defaults(func=delete)
+
+    for parser in [add_parser, del_parser]:
+        parser.add_argument("engine", help="path of the secret engine in vault")
+        parser.add_argument(
+            "vaultpath",
+            help="path where to add the password inside the secret engine vault",
+        )
+
+    add_parser.add_argument("data", help="data of the secret as json")
+
+    del_parser.add_argument(
+        "-r", "--recursive", help="deletes secrets recursively", action="store_true"
+    )
