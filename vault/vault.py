@@ -14,6 +14,7 @@ import string
 import os
 import requests
 from .secret.secret import Secret
+from .totp import Totp
 
 
 class Vault:
@@ -30,6 +31,7 @@ class Vault:
 
         # Initialize Subclasses
         self.secret = Secret(self)
+        self.totp = Totp(self)
 
     def path_to_ui_link(self, engine_path, path):
         """ Generate a url from the given path
@@ -269,6 +271,9 @@ def _requests_request(*args, **kwargs):
     logging.debug("%s %s", response.status_code, response.reason)
     logging.debug(response.content)
     if response.status_code > 399:
-        logging.error("\n".join(response.json()['errors']))
+        logging.error("%s %s", response.status_code, response.reason)
+        error_text = "\n".join(response.json()['errors'])
+        if error_text:
+            logging.error(error_text)
         exit(1)
     return response

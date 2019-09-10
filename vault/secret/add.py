@@ -23,10 +23,6 @@ def parse_commandline_arguments(subparsers):
     parser.add_argument("engine", help="path of the secret engine in vault")
     parser.add_argument(
         "vaultpath",
-        help="path where to delete the password inside the secret engine vault",
+        help="path where to add the password inside the secret engine vault",
     )
     parser.add_argument("data", help="data of the secret as json")
-
-    parser.add_argument(
-        "-r", "--recursive", help="deletes secrets recursively", action="store_true"
-    )
