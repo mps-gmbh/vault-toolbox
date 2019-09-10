@@ -13,73 +13,23 @@ import random
 import string
 import os
 import requests
+from secret.secret import Secret
 
 
 class Vault:
 
     """Class for wrapping the vault http api. """
+    # TODO: devide further into subclasses
 
     def __init__(self, vault_adress, token):
         self.vault_adress = vault_adress
         self.token = token
         self.token_header = {"X-Vault-Token": self.token}
+        self.normalize = _normalize
+        self.requests_request = _requests_request
 
-    def list(self, engine_path, path):
-        """ List secrets on a given path
-
-        :engine_path: path of the secret engine
-        :path: path to list
-        :returns: list of the secrets
-
-        """
-        path = _normalize("/" + engine_path + "/metadata/" + path)
-        address = self.vault_adress + "/v1" + path
-        # Actually run vault
-        request = _requests_request("LIST", address, headers=self.token_header)
-        data = json.loads(request.content)["data"]["keys"]
-        return data
-
-    def recursive_list(self, engine_path, path):
-        """ List secrets on a given path recursively
-
-        :engine_path: path of the secret engine
-        :path: path to list
-        :returns: generator for the secret list
-
-        """
-        secret_list = self.list(engine_path, path)
-        for secret in secret_list:
-            new_secret = _normalize(path + "/" + secret)
-            yield new_secret
-            if secret.endswith("/"):
-                recursive_secrets = self.recursive_list(engine_path, new_secret)
-                for recursive_secret in recursive_secrets:
-                    yield recursive_secret
-
-    def delete(self, engine_path, path):
-        """ Delete the given secret permanently from vault
-
-        :engine_path: path of the secret engine
-        :path: path to delete
-        :returns: None
-
-        """
-        path = _normalize("/" + engine_path + "/metadata/" + path)
-        address = self.vault_adress + "/v1" + path
-        # Actually run vault
-        logging.info("Deleting the secret: %s", address)
-        _requests_request("DELETE", address, headers=self.token_header)
-
-    def recursive_delete(self, engine_path, path):
-        """ Delete all secrets under the given path permanently from vault
-
-        :engine_path: path of the secret engine
-        :path: path to delete
-        :returns: None
-
-        """
-        for secret in self.recursive_list(engine_path, path):
-            self.delete(engine_path, secret)
+        # Initialize Subclasses
+        self.secret = Secret(self)
 
     def path_to_ui_link(self, engine_path, path):
         """ Generate a url from the given path
@@ -311,12 +261,14 @@ def _requests_request(*args, **kwargs):
     :returns: requests method
 
     """
-    # key_path = os.path.abspath("lets-encrypt-x3-cross-signed.pem.txt")
     key_path = os.path.abspath("./ca_bundle.crt")
     kwargs["verify"] = key_path
     logging.debug(kwargs)
     logging.debug(args)
-    request = requests.request(*args, **kwargs)
-    logging.debug("%s %s", request.status_code, request.reason)
-    logging.debug(request.content)
-    return request
+    response = requests.request(*args, **kwargs)
+    logging.debug("%s %s", response.status_code, response.reason)
+    logging.debug(response.content)
+    if response.status_code > 399:
+        logging.error("\n".join(response.json()['errors']))
+        exit(1)
+    return response

@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+# PYTHON_ARGCOMPLETE_OK
 """
 Commanline interface for the vault toolbox.
 
@@ -13,6 +14,7 @@ Mail: deurer@mps-med.de
 import logging
 import argparse
 import os
+import argcomplete
 
 import init_logging
 import unwrap
@@ -20,7 +22,8 @@ import export_to_html
 import list_users
 import add_user
 import del_user
-import del_secret
+import secret.delete
+import secret.add
 import vault_import
 from vault import Vault
 
@@ -58,12 +61,13 @@ def get_commandline_arguments():
     subparsers = parser.add_subparsers(help="subcommand", dest='subcommand', required=True)
 
     for subcommand in [unwrap, export_to_html, list_users,
-                       add_user, del_user, del_secret, vault_import]:
+                       add_user, del_user, secret.delete, secret.add, vault_import]:
         subcommand.parse_commandline_arguments(subparsers)
 
     for _, subparser in subparsers.choices.items():
         subparser.add_argument("token", help="Vault token")
 
+    argcomplete.autocomplete(parser)
     args = parser.parse_args()
     return args
 
