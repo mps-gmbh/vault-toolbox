@@ -32,7 +32,7 @@ def parse_commandline_arguments(subparsers):
     :returns: namespace with parsed arguments
 
     """
-    parser = subparsers.add_parser("del_user")
+    parser = subparsers.add_parser("user-del")
     parser.set_defaults(func=run)
 
     parser.add_argument("user", help="Vault user to delete")

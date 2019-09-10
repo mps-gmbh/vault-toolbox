@@ -13,7 +13,7 @@ import random
 import string
 import os
 import requests
-from secret.secret import Secret
+from .secret.secret import Secret
 
 
 class Vault:
@@ -261,7 +261,7 @@ def _requests_request(*args, **kwargs):
     :returns: requests method
 
     """
-    key_path = os.path.abspath("./ca_bundle.crt")
+    key_path = os.path.abspath("./vault/ca_bundle.crt")
     kwargs["verify"] = key_path
     logging.debug(kwargs)
     logging.debug(args)

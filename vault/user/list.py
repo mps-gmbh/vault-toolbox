@@ -35,5 +35,5 @@ def parse_commandline_arguments(subparsers):
     :returns: None
 
     """
-    parser = subparsers.add_parser("list_users")
+    parser = subparsers.add_parser("user-list")
     parser.set_defaults(func=run)

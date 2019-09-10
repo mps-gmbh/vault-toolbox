@@ -21,7 +21,7 @@ def parse_commandline_arguments(subparsers):
     :returns: None
 
     """
-    parser = subparsers.add_parser("add_user")
+    parser = subparsers.add_parser("user-add")
     parser.set_defaults(func=run)
 
     parser.add_argument("firstname", help="Firstname of vault user to create")
