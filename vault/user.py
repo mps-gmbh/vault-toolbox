@@ -189,7 +189,7 @@ def add(args, vault):
     :returns: None
 
     """
-    password = vault.add_user(args.firstname, args.lastname)
+    password = vault.user.add(args.firstname, args.lastname)
     token = vault.wrap({"password": password})
     unwrap = vault.unwrap_str(token)
     print(unwrap)
@@ -199,19 +199,19 @@ def delete(args, vault):
     :returns: None
 
     """
-    user = vault.get_entity_by_name(args.user)
-    # TODO: test this
+    user = vault.user.get_entity_by_name(args.user)
     if user is None:
-        logging.error("The given user does not exist, %s%s",
+        logging.error("The user '%s' does not exist, %s%s",
+                      args.user,
                       "please choose one of the following users:\n\n",
-                      "\n".join([entity["name"] for entity in vault.get_entities()]))
+                      "\n".join([entity["name"] for entity in vault.user.get_entities()]))
         exit(1)
     aliases = user["aliases"]
     for alias in aliases:
         logging.info("Deleting alias %s", alias["name"])
-        vault.del_userpass_user(alias["name"])
+        vault.user.del_userpass_user(alias["name"])
     logging.info("Deleting entity %s", args.user)
-    vault.del_entity(args.user)
+    vault.user.del_entity(args.user)
 
 def list_user(_, vault):
     """Entrypoint when used as an executable
@@ -219,19 +219,19 @@ def list_user(_, vault):
 
     """
 
-    users = vault.get_userpass_users()
+    users = vault.user.get_userpass_users()
     print("## Userpass users:\n")
     for user in users:
         print(user)
 
 
     print("\n## Entities:\n")
-    users = vault.get_entities()
+    users = vault.user.get_entities()
     for user in users:
         print(user["name"])
 
     print("\n## Entity aliases:\n")
-    users = vault.get_entities()
+    users = vault.user.get_entities()
     for user in users:
         print(user["name"] + " -> aliases:" + str([alias["name"] for alias in user["aliases"]]))
 

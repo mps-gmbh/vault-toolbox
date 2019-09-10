@@ -112,5 +112,4 @@ class Vault:
             error_text = "\n".join(response.json()['errors'])
             if error_text:
                 logging.error(error_text)
-            exit(1)
         return response
