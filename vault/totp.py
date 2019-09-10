@@ -129,31 +129,24 @@ def delete(args, vault):
 
 def parse_commandline_arguments(subparsers):
     """ Commandline argument parser for this module
-    :returns: namespace with parsed arguments
+    :returns: None
 
     """
-    # TODO: Fix code duplication of engine and name
-    parser = subparsers.add_parser("totp-add")
-    parser.set_defaults(func=add)
+    add_parser = subparsers.add_parser("totp-add")
+    list_parser = subparsers.add_parser("totp-list")
+    read_parser = subparsers.add_parser("totp-read")
+    del_parser = subparsers.add_parser("totp-del")
 
-    parser.add_argument("engine", help="path of the secret engine in vault")
-    parser.add_argument("name", help="name of the totp key")
-    parser.add_argument("issuer", help="name of the issuer")
-    parser.add_argument("account", help="account of this key")
+    add_parser.set_defaults(func=add)
+    list_parser.set_defaults(func=list_totp)
+    read_parser.set_defaults(func=read)
+    del_parser.set_defaults(func=delete)
 
-    parser = subparsers.add_parser("totp-list")
-    parser.set_defaults(func=list_totp)
+    for parser in [add_parser, list_parser, read_parser, del_parser]:
+        parser.add_argument("engine", help="path of the secret engine in vault")
 
-    parser.add_argument("engine", help="path of the secret engine in vault")
+    for parser in [add_parser, read_parser, del_parser]:
+        parser.add_argument("name", help="name of the totp key")
 
-    parser = subparsers.add_parser("totp-read")
-    parser.set_defaults(func=read)
-
-    parser.add_argument("engine", help="path of the secret engine in vault")
-    parser.add_argument("name", help="name of the totp key")
-
-    parser = subparsers.add_parser("totp-del")
-    parser.set_defaults(func=delete)
-
-    parser.add_argument("engine", help="path of the secret engine in vault")
-    parser.add_argument("name", help="name of the totp key")
+    add_parser.add_argument("issuer", help="name of the issuer")
+    add_parser.add_argument("account", help="account of this key")
