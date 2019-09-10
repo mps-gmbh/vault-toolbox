@@ -18,9 +18,7 @@ import argcomplete
 
 import vault.unwrap
 import vault.export_to_html
-import vault.user.list
-import vault.user.add
-import vault.user.delete
+import vault.user
 import vault.secret
 import vault.totp
 import vault.import_from_csv
@@ -61,9 +59,7 @@ def get_commandline_arguments():
 
     for subcommand in [
             vault.secret,
-            vault.user.list,
-            vault.user.add,
-            vault.user.delete,
+            vault.user,
             vault.totp,
             vault.unwrap,
             vault.export_to_html,

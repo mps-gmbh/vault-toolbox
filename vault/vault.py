@@ -9,29 +9,25 @@ Mail: deurer@mps-med.de
 """
 import logging
 import json
-import random
-import string
 import os
 import requests
-from .secret.secret import Secret
+from .secret import Secret
 from .totp import Totp
+from .user import User
 
 
 class Vault:
 
     """Class for wrapping the vault http api. """
-    # TODO: devide further into subclasses
-
     def __init__(self, vault_adress, token):
         self.vault_adress = vault_adress
         self.token = token
         self.token_header = {"X-Vault-Token": self.token}
-        self.normalize = _normalize
-        self.requests_request = _requests_request
 
         # Initialize Subclasses
         self.secret = Secret(self)
         self.totp = Totp(self)
+        self.user = User(self)
 
     def path_to_ui_link(self, engine_path, path):
         """ Generate a url from the given path
@@ -47,168 +43,7 @@ class Vault:
             path_extension = "/show/"
 
         adress = "/ui/vault/secrets/" + engine_path + path_extension + path
-        return self.vault_adress + _normalize(adress)
-
-    def add_user(self, firstname, lastname, password=None):
-        """ Add a userpass login, an entity and an alias to vault.
-        The entity uses first and last name, the userpass only uses the second
-        name, the alias connects both of the others.
-
-        :firstname: Firstname of vault user to create
-        :lastname: Lastname of vault user to create
-        :password: If not provided a random one will be generated
-        :returns: Password of the user
-
-        """
-        username = firstname.lower() + "." + lastname.lower()
-        password = self._add_userpass_login(username, password)
-        metadata = {
-            "name": firstname + "_" + lastname,
-            "metadata": {"organization": "MPS GmbH"},
-            "policies": ["base"],
-        }
-        entity_id = self._add_entity(metadata)
-        self._add_alias(username, entity_id)
-        return password
-
-    def _add_userpass_login(self, username, password=None):
-        """ Add a userpass login to vault
-
-        :username: Userpass login name
-        :password: If not provided a random one will be generated
-        :returns: password
-
-        """
-        # If password is not given generate a random one
-        if password is None:
-            password = "".join(
-                random.SystemRandom().choice(string.ascii_letters + string.digits)
-                for _ in range(16)
-            )
-        # Add the user in vault
-        address = self.vault_adress + "/v1/auth/userpass/users/" + username
-        data = json.dumps({"password": password})
-        logging.info("Creating userpass login for: %s", username)
-        _requests_request("POST", address, headers=self.token_header, data=data)
-        return password
-
-    def _add_entity(self, data):
-        """ Add entity to vault
-
-        :data: Metadata that will be attached to the entity
-        :returns: None
-
-        """
-        # Add the user in vault
-        address = self.vault_adress + "/v1/identity/entity"
-        payload = json.dumps(data)
-        logging.info("Creating entity with data: %s ", data)
-        request = _requests_request(
-            "POST", address, headers=self.token_header, data=payload
-        )
-        try:
-            user_id = json.loads(request.content)["data"]["id"]
-        except json.decoder.JSONDecodeError:
-            # If there was content, maybe this is actually an error
-            if request.content:
-                logging.exception("Error while decoding the following json:")
-                raise
-            else:
-                logging.error(
-                    "An empty response was returned, seems like the user already exists"
-                )
-                logging.debug("Loading userid manually")
-                user_id = self._get_entity_id(data["name"])
-
-        return user_id
-
-    def _add_alias(self, username, entity_id):
-        """ Add an alias between the given userpass username and the given entity.
-
-        :username: userpass username
-        :entity_id: id of the entity for the alias
-
-        """
-        # Get mount accessor of userpass
-        address = self.vault_adress + "/v1/sys/auth"
-        request = _requests_request("GET", address, headers=self.token_header)
-        userpass_accessor = json.loads(request.content)["userpass/"]["accessor"]
-
-        # Add the user in vault
-        address = self.vault_adress + "/v1/identity/entity-alias"
-        payload = json.dumps(
-            {
-                "name": username,
-                "canonical_id": entity_id,
-                "mount_accessor": userpass_accessor,
-            }
-        )
-        request = _requests_request(
-            "POST", address, headers=self.token_header, data=payload
-        )
-
-    def del_userpass_user(self, user):
-        """ Delete the given userpass user
-        :returns: None
-
-        """
-        address = self.vault_adress + "/v1/auth/userpass/users/" + user
-        _requests_request("DELETE", address, headers=self.token_header)
-
-    def del_entity(self, entity):
-        """Delte the given entity
-
-        :enity: Name of the entity
-        :returns: None
-
-        """
-        address = self.vault_adress + "/v1/identity/entity/name/" + entity
-        _requests_request("DELETE", address, headers=self.token_header)
-
-    def get_userpass_users(self):
-        """ Get all users
-        :returns: Users
-
-        """
-        address = self.vault_adress + "/v1/auth/userpass/users"
-        request = _requests_request("LIST", address, headers=self.token_header)
-        return json.loads(request.content)["data"]["keys"]
-
-    def get_entities(self):
-        """ Get all entities in vault
-        :returns: Iterator over entities
-
-        """
-        address = self.vault_adress + "/v1/identity/entity/name"
-        request = _requests_request("LIST", address, headers=self.token_header)
-        entity_names = json.loads(request.content)["data"]["keys"]
-        for name in entity_names:
-            yield self.get_entity_by_name(name)
-
-
-    def get_entity_by_name(self, name):
-        """Resolve entity name to full entity information
-
-        :name: name of the entity
-        :returns: Dict with entity information
-
-        """
-        address = self.vault_adress + "/v1/identity/entity/name/" + name
-        request = _requests_request("GET", address, headers=self.token_header)
-        # If user does not exist return None
-        if request.status_code == 404:
-            return None
-        return json.loads(request.content)["data"]
-
-
-    def _get_entity_id(self, user):
-        """Get id for the given user
-        :returns: UserId
-
-        """
-        address = self.vault_adress + "/v1/identity/entity/name/" + user
-        request = _requests_request("GET", address, headers=self.token_header)
-        return json.loads(request.content)["data"]["id"]
+        return self.vault_adress + self.normalize(adress)
 
     def wrap(self, data, ttl=600):
         """ Wrap the given data in vault
@@ -218,7 +53,7 @@ class Vault:
         address = self.vault_adress + "/v1/sys/wrapping/wrap"
         data = json.dumps(data)
         header = {"X-Vault-Wrap-TTL": str(ttl), **self.token_header}
-        request = _requests_request("POST", address, headers=header, data=data)
+        request = self.requests_request("POST", address, headers=header, data=data)
         return json.loads(request.content)["wrap_info"]["token"]
 
     def unwrap(self, token=None):
@@ -231,7 +66,7 @@ class Vault:
             token = self.token
         header = {"X-Vault-Token": token}
         address = self.vault_adress + "/v1/sys/wrapping/unwrap"
-        request = _requests_request("POST", address, headers=header)
+        request = self.requests_request("POST", address, headers=header)
         try:
             data = json.loads(request.content)["data"]
         except KeyError:
@@ -247,33 +82,35 @@ class Vault:
         return "VAULT_ADDR=" + self.vault_adress + " ./vault_toolbox.py unwrap " + token
 
 
-def _normalize(path):
-    """Replace spaces with underscores, everything to lowercase, remove double
-    slashes
-    :path: path to be normalized
-    :returns: normalized string
+    @staticmethod
+    def normalize(path):
+        """Replace spaces with underscores, everything to lowercase, remove double
+        slashes
+        :path: path to be normalized
+        :returns: normalized string
 
-    """
-    return path.replace(" ", "_").lower().replace("//", "/")
+        """
+        return path.replace(" ", "_").lower().replace("//", "/")
 
 
-def _requests_request(*args, **kwargs):
-    """ Overwrites the requests.requests method with a default argument for verify
+    @staticmethod
+    def requests_request(*args, **kwargs):
+        """ Overwrites the requests.requests method with a default argument for verify
 
-    :returns: requests method
+        :returns: requests method
 
-    """
-    key_path = os.path.abspath("./vault/ca_bundle.crt")
-    kwargs["verify"] = key_path
-    logging.debug(kwargs)
-    logging.debug(args)
-    response = requests.request(*args, **kwargs)
-    logging.debug("%s %s", response.status_code, response.reason)
-    logging.debug(response.content)
-    if response.status_code > 399:
-        logging.error("%s %s", response.status_code, response.reason)
-        error_text = "\n".join(response.json()['errors'])
-        if error_text:
-            logging.error(error_text)
-        exit(1)
-    return response
+        """
+        key_path = os.path.abspath("./vault/ca_bundle.crt")
+        kwargs["verify"] = key_path
+        logging.debug(kwargs)
+        logging.debug(args)
+        response = requests.request(*args, **kwargs)
+        logging.debug("%s %s", response.status_code, response.reason)
+        logging.debug(response.content)
+        if response.status_code > 399:
+            logging.error("%s %s", response.status_code, response.reason)
+            error_text = "\n".join(response.json()['errors'])
+            if error_text:
+                logging.error(error_text)
+            exit(1)
+        return response
