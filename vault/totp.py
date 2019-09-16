@@ -80,6 +80,22 @@ class Totp:
         data = json.loads(response.content)["data"]["code"]
         return data
 
+    def add_from_url(self, engine_path, name, totp_url):
+        """TODO: Docstring for import.
+
+        :arg1: TODO
+        :returns: TODO
+
+        """
+        path = self.vault.normalize("/" + engine_path + "/keys/" + name)
+        address = self.vault.vault_adress + "/v1" + path
+        logging.info("Adding the totp key: %s", address)
+        payload_dict = dict()
+        payload_dict["generate"] = False
+        payload_dict["url"] = totp_url
+        payload = json.dumps(payload_dict)
+        self.vault.requests_request("POST", address, headers=self.vault.token_header,
+                                    data=payload)
 
 
 def add(args, vault):
@@ -126,6 +142,16 @@ def delete(args, vault):
     """
     vault.totp.delete(args.engine, args.name)
 
+def totp_import(args, vault):
+    """Run import operation
+
+    :args: Parsed commandline arguments
+    :vault: Vault class
+    :returns: None
+
+    """
+    vault.totp.add_from_url(args.engine, args.name, args.url)
+
 
 def parse_commandline_arguments(subparsers):
     """ Commandline argument parser for this module
@@ -136,17 +162,22 @@ def parse_commandline_arguments(subparsers):
     list_parser = subparsers.add_parser("totp-list")
     read_parser = subparsers.add_parser("totp-read")
     del_parser = subparsers.add_parser("totp-del")
+    import_parser = subparsers.add_parser("totp-import")
+
 
     add_parser.set_defaults(func=add)
     list_parser.set_defaults(func=list_totp)
     read_parser.set_defaults(func=read)
     del_parser.set_defaults(func=delete)
+    import_parser.set_defaults(func=totp_import)
 
-    for parser in [add_parser, list_parser, read_parser, del_parser]:
+    for parser in [add_parser, list_parser, read_parser, del_parser, import_parser]:
         parser.add_argument("engine", help="path of the secret engine in vault")
 
-    for parser in [add_parser, read_parser, del_parser]:
+    for parser in [add_parser, read_parser, del_parser, import_parser]:
         parser.add_argument("name", help="name of the totp key")
 
     add_parser.add_argument("issuer", help="name of the issuer")
     add_parser.add_argument("account", help="account of this key")
+
+    import_parser.add_argument("url", help="TOTP url")
