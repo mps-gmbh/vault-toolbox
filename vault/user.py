@@ -238,7 +238,7 @@ def list_user(_, vault):
 
 
 
-def parse_commandline_arguments(subparsers):
+def parse_commandline_arguments(subparsers, _):
     """ Commandline argument parser for this module
     :returns: None
 

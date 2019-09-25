@@ -6,7 +6,7 @@ Author: Janosch Deurer
 Mail: deurer@mps-med.de
 
 """
-def run(args, vault):
+def run(_, vault):
     """Run this module
 
     :args: Commandline arguments
@@ -15,7 +15,7 @@ def run(args, vault):
     """
     print(vault.unwrap())
 
-def parse_commandline_arguments(subparsers):
+def parse_commandline_arguments(subparsers, _):
     """ Commandline argument parser for this module
     :returns: None
 

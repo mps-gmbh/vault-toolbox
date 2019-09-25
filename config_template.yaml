@@ -1,2 +1,6 @@
 token:
 url:
+secret:
+  engine: passwords
+totp:
+  engine: totp

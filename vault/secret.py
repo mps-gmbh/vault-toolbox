@@ -10,13 +10,13 @@ Mail: deurer@mps-med.de
 import json
 import logging
 
+
 class Secret:
 
     """Class for wrapping the secret part of the vault api."""
 
     def __init__(self, vault):
         self.vault = vault
-
 
     def list(self, engine_path, path):
         """ List secrets on a given path
@@ -28,7 +28,9 @@ class Secret:
         """
         path = self.vault.normalize("/" + engine_path + "/metadata/" + path)
         address = self.vault.vault_adress + "/v1" + path
-        request = self.vault.requests_request("LIST", address, headers=self.vault.token_header)
+        request = self.vault.requests_request(
+            "LIST", address, headers=self.vault.token_header
+        )
         data = json.loads(request.content)["data"]["keys"]
         return data
 
@@ -76,11 +78,11 @@ class Secret:
         address = self.vault.vault_adress + "/v1" + path
         logging.info("Adding the secret: %s", address)
         payload = json.dumps({"data": data})
-        response = self.vault.requests_request("POST", address, headers=self.vault.token_header,
-                                               data=payload)
+        response = self.vault.requests_request(
+            "POST", address, headers=self.vault.token_header, data=payload
+        )
         if response.json()["data"]["version"] != 1:
             logging.info("Secret already existed, creating new version with given data")
-
 
     def recursive_delete(self, engine_path, path):
         """ Delete all secrets under the given path permanently from vault
@@ -101,6 +103,7 @@ def add(args, vault):
     """
     vault.secret.add(args.engine, args.vaultpath, json.loads(args.data))
 
+
 def delete(args, vault):
     """Run this module
     :returns: None
@@ -112,8 +115,7 @@ def delete(args, vault):
     vault.secret.delete(args.engine, args.vaultpath)
 
 
-
-def parse_commandline_arguments(subparsers):
+def parse_commandline_arguments(subparsers, config):
     """ Commandline argument parser for this module
     :returns: None
 
@@ -127,7 +129,18 @@ def parse_commandline_arguments(subparsers):
     del_parser.set_defaults(func=delete)
 
     for parser in [add_parser, del_parser]:
-        parser.add_argument("engine", help="path of the secret engine in vault")
+        if "totp" in config and "engine" in config["totp"]:
+            parser.add_argument(
+                "engine",
+                nargs="?",
+                default=config["totp"]["engine"],
+                help="path of the secret engine in vault, if "
+                + "not provided the path in the config will be "
+                + "used",
+            )
+        else:
+            parser.add_argument("engine", help="path of the secret engine in vault")
+
         parser.add_argument(
             "vaultpath",
             help="path where to add the password inside the secret engine vault",

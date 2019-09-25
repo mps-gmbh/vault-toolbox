@@ -153,7 +153,7 @@ def totp_import(args, vault):
     vault.totp.add_from_url(args.engine, args.name, args.url)
 
 
-def parse_commandline_arguments(subparsers):
+def parse_commandline_arguments(subparsers, config):
     """ Commandline argument parser for this module
     :returns: None
 
@@ -172,7 +172,17 @@ def parse_commandline_arguments(subparsers):
     import_parser.set_defaults(func=totp_import)
 
     for parser in [add_parser, list_parser, read_parser, del_parser, import_parser]:
-        parser.add_argument("engine", help="path of the secret engine in vault")
+        if "secret" in config and "engine" in config["totp"]:
+            parser.add_argument(
+                "engine",
+                nargs="?",
+                default=config["totp"]["engine"],
+                help="path of the secret engine in vault, if "
+                + "not provided the path in the config will be "
+                + "used",
+            )
+        else:
+            parser.add_argument("engine", help="path of the secret engine in vault")
 
     for parser in [add_parser, read_parser, del_parser, import_parser]:
         parser.add_argument("name", help="name of the totp key")

@@ -74,7 +74,7 @@ def normalize(path):
     return path.replace(" ", "_").lower().replace("//", "/")
 
 
-def parse_commandline_arguments(subparsers):
+def parse_commandline_arguments(subparsers, config):
     """ Commandline argument parser for this module
     :returns: None
 
@@ -82,7 +82,19 @@ def parse_commandline_arguments(subparsers):
     parser = subparsers.add_parser("import_from_csv")
     parser.set_defaults(func=run)
 
-    parser.add_argument("engine", help="path of the secret engine in vault")
+    # TODO: Fix this code duplication
+    if "secret" in config and "engine" in config["totp"]:
+        parser.add_argument(
+            "engine",
+            nargs="?",
+            default=config["secret"]["engine"],
+            help="path of the secret engine in vault, if "
+            + "not provided the path in the config will be "
+            + "used",
+        )
+    else:
+        parser.add_argument("engine", help="path of the secret engine in vault")
+
     parser.add_argument(
         "vaultpath",
         help="path where to put the passwords inside the secret engine vault",

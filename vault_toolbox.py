@@ -66,7 +66,7 @@ def get_commandline_arguments(config):
             vault.export_to_html,
             vault.import_from_csv,
     ]:
-        subcommand.parse_commandline_arguments(subparsers)
+        subcommand.parse_commandline_arguments(subparsers, config)
 
     for _, subparser in subparsers.choices.items():
         if "token" in config:
