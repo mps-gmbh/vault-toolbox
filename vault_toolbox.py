@@ -13,7 +13,6 @@ Mail: deurer@mps-med.de
 """
 import logging
 import argparse
-import os
 import argcomplete
 import yaml
 
@@ -37,8 +36,7 @@ def main():
     config = read_config()
     args = get_commandline_arguments(config)
     init_logging(args)
-    # TODO: Read url from file or cli
-    args.func(args, Vault(os.environ["VAULT_ADDR"], args.token))
+    args.func(args, Vault(args.url, args.token))
 
 
 def get_commandline_arguments(config):
@@ -71,12 +69,19 @@ def get_commandline_arguments(config):
         subcommand.parse_commandline_arguments(subparsers)
 
     for _, subparser in subparsers.choices.items():
-        if config["token"]:
+        if "token" in config:
             subparser.add_argument("token", nargs='?', default=config["token"],
                                    help="Vault token, if not provided, " + \
                                    "the token from the config will be used")
         else:
             subparser.add_argument("token", help="Vault token")
+
+        if "url" in config:
+            subparser.add_argument("url", nargs='?', default=config["url"],
+                                   help="Url of vault server, if not provided, " + \
+                                   "the url from the config will be used")
+        else:
+            subparser.add_argument("url", help="Url of vault server")
 
     argcomplete.autocomplete(parser)
     args = parser.parse_args()
