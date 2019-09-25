@@ -15,6 +15,7 @@ import logging
 import argparse
 import os
 import argcomplete
+import yaml
 
 import vault.unwrap
 import vault.export_to_html
@@ -32,13 +33,15 @@ def main():
     """
     # Initialize Logging
     logging.basicConfig(level=logging.DEBUG)
-    args = get_commandline_arguments()
+
+    config = read_config()
+    args = get_commandline_arguments(config)
     init_logging(args)
     # TODO: Read url from file or cli
     args.func(args, Vault(os.environ["VAULT_ADDR"], args.token))
 
 
-def get_commandline_arguments():
+def get_commandline_arguments(config):
     """ Commandline argument parser for this module
     :returns: namespace with parsed arguments
 
@@ -68,7 +71,12 @@ def get_commandline_arguments():
         subcommand.parse_commandline_arguments(subparsers)
 
     for _, subparser in subparsers.choices.items():
-        subparser.add_argument("token", help="Vault token")
+        if config["token"]:
+            subparser.add_argument("token", nargs='?', default=config["token"],
+                                   help="Vault token, if not provided, " + \
+                                   "the token from the config will be used")
+        else:
+            subparser.add_argument("token", help="Vault token")
 
     argcomplete.autocomplete(parser)
     args = parser.parse_args()
@@ -104,6 +112,20 @@ def init_logging(commandline_args):
     loglevel = getattr(logging, loglevel.upper())
     logging.getLogger().setLevel(loglevel)
 
+def read_config():
+    """Parses config and returns config values
+    :returns: config as dict
+    """
+    try:
+        stream = open("config.yaml", "r")
+    except FileNotFoundError:
+        return None
+    try:
+        config = yaml.safe_load(stream)
+    except yaml.YAMLError as exception:
+        logging.error("YAML error while parsing config.yaml:\n%s", exception)
+        exit()
+    return config
 
 if __name__ == "__main__":
     main()

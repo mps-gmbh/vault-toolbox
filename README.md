@@ -23,6 +23,13 @@ Documentation for all subcommands can be found with:
 ./vault-toolbox.py <subcommand> --help
 ```
 
+## Config
+
+Some of the commandline arguments can be given in the `config.yaml`. Copy the example file and adapt it to your needs:
+```bash
+cp ./config_template.yaml config.yaml
+```
+
 ## TOTP QR-Codes
 
 The `totp-import` command needs a TOTP key url string as an argument. For many providers this is given as a QR-Code. If so save the image of the QR-Code and install `zbar-tools`:
@@ -35,4 +42,5 @@ zbarimg "image-file-name.jpg"
 ```
 
 <!-- TODO: add more documentation -->
+<!-- TODO: add argcomplete docu -->
 
