@@ -81,10 +81,12 @@ class Totp:
         return data
 
     def add_from_url(self, engine_path, name, totp_url):
-        """TODO: Docstring for import.
+        """Add totp from a given url
 
-        :arg1: TODO
-        :returns: TODO
+        :engine: totp engine
+        :name: totp token name
+        :totp_url: url with the details of the token
+        :returns: None
 
         """
         path = self.vault.normalize("/" + engine_path + "/keys/" + name)
