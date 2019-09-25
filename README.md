@@ -23,6 +23,10 @@ Documentation for all subcommands can be found with:
 ./vault-toolbox.py <subcommand> --help
 ```
 
+## Tab Completion
+
+This project uses argcomplete to provide commandline tab completion. Installation instructions can be found here: [https://argcomplete.readthedocs.io/en/latest/#installation]()
+
 ## Config
 
 Some of the commandline arguments can be given in the `config.yaml`. Copy the example file and adapt it to your needs:
