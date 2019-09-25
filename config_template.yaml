@@ -1,5 +1,6 @@
 token:
 url:
+organization: "MPS GmbH"
 secret:
   engine: passwords
 totp:

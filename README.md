@@ -46,5 +46,4 @@ zbarimg "image-file-name.jpg"
 ```
 
 <!-- TODO: add more documentation -->
-<!-- TODO: add argcomplete docu -->
 

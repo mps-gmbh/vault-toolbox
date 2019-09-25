@@ -19,7 +19,7 @@ class User:
     def __init__(self, vault):
         self.vault = vault
 
-    def add(self, firstname, lastname, password=None):
+    def add(self, firstname, lastname, organization, password=None):
         """ Add a userpass login, an entity and an alias to vault.
         The entity uses first and last name, the userpass only uses the second
         name, the alias connects both of the others.
@@ -32,10 +32,9 @@ class User:
         """
         username = firstname.lower() + "." + lastname.lower()
         password = self._add_userpass_login(username, password)
-        # TODO: make organization configurable
         metadata = {
             "name": firstname + "_" + lastname,
-            "metadata": {"organization": "MPS GmbH"},
+            "metadata": {"organization": organization},
             "policies": ["base"],
         }
         entity_id = self._add_entity(metadata)
@@ -189,7 +188,7 @@ def add(args, vault):
     :returns: None
 
     """
-    password = vault.user.add(args.firstname, args.lastname)
+    password = vault.user.add(args.firstname, args.lastname, args.organization)
     token = vault.wrap({"password": password})
     unwrap = vault.unwrap_str(token)
     print(unwrap)
@@ -238,7 +237,7 @@ def list_user(_, vault):
 
 
 
-def parse_commandline_arguments(subparsers, _):
+def parse_commandline_arguments(subparsers, config):
     """ Commandline argument parser for this module
     :returns: None
 
@@ -253,5 +252,18 @@ def parse_commandline_arguments(subparsers, _):
 
     add_parser.add_argument("firstname", help="Firstname of vault user to create")
     add_parser.add_argument("lastname", help="Lastname of vault user to create")
+
+    if "organization" in config:
+        add_parser.add_argument(
+            "organization",
+            nargs="?",
+            default=config["organization"],
+            help="organization of the user, if"
+            + "not provided the organization in the config will be "
+            + "used",
+        )
+    else:
+        add_parser.add_argument("organization", help="organization of the user")
+
 
     del_parser.add_argument("user", help="Vault user to delete")

@@ -174,7 +174,7 @@ def parse_commandline_arguments(subparsers, config):
     import_parser.set_defaults(func=totp_import)
 
     for parser in [add_parser, list_parser, read_parser, del_parser, import_parser]:
-        if "secret" in config and "engine" in config["totp"]:
+        if "totp" in config and "engine" in config["totp"]:
             parser.add_argument(
                 "engine",
                 nargs="?",

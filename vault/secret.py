@@ -129,11 +129,11 @@ def parse_commandline_arguments(subparsers, config):
     del_parser.set_defaults(func=delete)
 
     for parser in [add_parser, del_parser]:
-        if "totp" in config and "engine" in config["totp"]:
+        if "secret" in config and "engine" in config["secret"]:
             parser.add_argument(
                 "engine",
                 nargs="?",
-                default=config["totp"]["engine"],
+                default=config["secret"]["engine"],
                 help="path of the secret engine in vault, if "
                 + "not provided the path in the config will be "
                 + "used",
