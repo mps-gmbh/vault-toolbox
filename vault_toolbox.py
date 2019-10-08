@@ -13,9 +13,11 @@ Mail: deurer@mps-med.de
 """
 import logging
 import argparse
-import argcomplete
 import yaml
-
+try:
+    import argcomplete
+except ImportError:
+    pass
 import vault.unwrap
 import vault.export_to_html
 import vault.user
