@@ -129,7 +129,7 @@ def parse_commandline_arguments(subparsers, config):
     del_parser.set_defaults(func=delete)
 
     for parser in [add_parser, del_parser]:
-        if "secret" in config and "engine" in config["secret"]:
+        if config is not None and "secret" in config and "engine" in config["secret"]:
             parser.add_argument(
                 "engine",
                 nargs="?",

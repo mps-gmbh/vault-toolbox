@@ -71,14 +71,14 @@ def get_commandline_arguments(config):
         subcommand.parse_commandline_arguments(subparsers, config)
 
     for _, subparser in subparsers.choices.items():
-        if "token" in config:
+        if config is not None and "token" in config:
             subparser.add_argument("token", nargs='?', default=config["token"],
                                    help="Vault token, if not provided, " + \
                                    "the token from the config will be used")
         else:
             subparser.add_argument("token", help="Vault token")
 
-        if "url" in config:
+        if config is not None and "url" in config:
             subparser.add_argument("url", nargs='?', default=config["url"],
                                    help="Url of vault server, if not provided, " + \
                                    "the url from the config will be used")

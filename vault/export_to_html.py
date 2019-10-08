@@ -54,7 +54,7 @@ def parse_commandline_arguments(subparsers, config):
     parser = subparsers.add_parser("export")
     parser.set_defaults(func=run)
     # TODO: Fix code duplication
-    if "secret" in config and "engine" in config["secret"]:
+    if config is not None and "secret" in config and "engine" in config["secret"]:
         parser.add_argument(
             "engine",
             nargs="?",

@@ -253,7 +253,7 @@ def parse_commandline_arguments(subparsers, config):
     add_parser.add_argument("firstname", help="Firstname of vault user to create")
     add_parser.add_argument("lastname", help="Lastname of vault user to create")
 
-    if "organization" in config:
+    if config is not None and "organization" in config:
         add_parser.add_argument(
             "organization",
             nargs="?",
