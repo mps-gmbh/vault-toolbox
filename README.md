@@ -25,7 +25,7 @@ Documentation for all subcommands can be found with:
 
 ## Tab Completion
 
-This project uses argcomplete to provide commandline tab completion. Installation instructions can be found here: [https://argcomplete.readthedocs.io/en/latest/#installation]()
+This project uses argcomplete to provide commandline tab completion. Installation instructions can be found here: [https://argcomplete.readthedocs.io/en/latest/#installation](https://argcomplete.readthedocs.io/en/latest/#installation)
 
 ## Config
 
