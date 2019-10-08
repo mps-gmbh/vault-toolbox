@@ -85,7 +85,8 @@ def get_commandline_arguments(config):
         else:
             subparser.add_argument("url", help="Url of vault server")
 
-    argcomplete.autocomplete(parser)
+    if 'argcomplete' in globals():
+        argcomplete.autocomplete(parser)
     args = parser.parse_args()
     return args
 
