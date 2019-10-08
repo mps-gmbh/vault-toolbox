@@ -26,6 +26,7 @@ class Totp:
 
         """
         path = self.vault.normalize("/" + engine_path + "/keys")
+        # TODO: replace with urlparse everywhere
         address = self.vault.vault_adress + "/v1" + path
         request = self.vault.requests_request("LIST", address, headers=self.vault.token_header)
         data = json.loads(request.content)["data"]["keys"]

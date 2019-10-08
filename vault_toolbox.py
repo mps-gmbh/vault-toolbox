@@ -133,6 +133,10 @@ def read_config():
     except yaml.YAMLError as exception:
         logging.error("YAML error while parsing config.yaml:\n%s", exception)
         exit()
+    # Remove / on the end of url
+    if "url" in config:
+        config["url"] = config["url"].rstrip("/")
+
     return config
 
 if __name__ == "__main__":
