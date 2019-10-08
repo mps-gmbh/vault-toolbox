@@ -57,7 +57,7 @@ def get_commandline_arguments(config):
     )
     # Add parsers for subcommand
     subparsers = parser.add_subparsers(
-        help="subcommand", dest="subcommand", required=True
+        help="subcommand", dest="subcommand"
     )
 
     for subcommand in [
