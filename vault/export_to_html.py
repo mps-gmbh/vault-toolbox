@@ -10,7 +10,7 @@ def run(args, vault):
 
     """
 
-    secrets = vault.recursive_list(args.engine, args.vaultpath)
+    secrets = vault.secret.recursive_list(args.engine, args.vaultpath)
     path_depth = 0
     ul_count = 0
     for secret in secrets:
