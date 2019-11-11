@@ -34,7 +34,7 @@ class Secret:
         try:
             data = json.loads(request.content)["data"]["keys"]
         except json.decoder.JSONDecodeError:
-            logging.error("Listing the secret %s lead to the following error:", path)
+            logging.exception("Listing the secret %s lead to the following error:", path)
             exit(1)
         return data
 
