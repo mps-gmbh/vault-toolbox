@@ -86,7 +86,7 @@ class Secret:
             "POST", address, headers=self.vault.token_header, data=payload
         )
         if response.json()["data"]["version"] != 1:
-            logging.info("Secret already existed, creating new version with given data")
+            logging.warning("Secret already existed, creating new version with given data")
 
     def recursive_delete(self, engine_path, path):
         """ Delete all secrets under the given path permanently from vault
@@ -98,6 +98,21 @@ class Secret:
         """
         for secret in self.recursive_list(engine_path, path):
             self.delete(engine_path, secret)
+
+    def read(self, engine_path, path):
+        """ read the details of the given secret
+
+        :engine_path: path of the secret engine
+        :path: path of the secret
+        :returns: secret details as dict
+
+        """
+        path = self.vault.normalize("/" + engine_path + "/data/" + path)
+        address = self.vault.vault_adress + "/v1" + path
+        logging.info("Reading the secret: %s", address)
+        response = self.vault.requests_request("GET", address, headers=self.vault.token_header)
+        secret_details = response.json()["data"]["data"]
+        return secret_details
 
 
 def add(args, vault):
@@ -127,6 +142,13 @@ def list_secrets(args, vault):
     for secret in secret_list:
         print(secret)
 
+def read(args, vault):
+    """Run this module
+    :returns: None
+
+    """
+    secret_details = vault.secret.read(args.engine, args.vaultpath)
+    print(secret_details)
 
 
 def parse_commandline_arguments(subparsers, config):
@@ -137,12 +159,14 @@ def parse_commandline_arguments(subparsers, config):
     add_parser = subparsers.add_parser("secret-add")
     del_parser = subparsers.add_parser("secret-del")
     list_parser = subparsers.add_parser("secret-list")
+    read_parser = subparsers.add_parser("secret-read")
 
     add_parser.set_defaults(func=add)
     del_parser.set_defaults(func=delete)
     list_parser.set_defaults(func=list_secrets)
+    read_parser.set_defaults(func=read)
 
-    for parser in [add_parser, del_parser, list_parser]:
+    for parser in [add_parser, del_parser, list_parser, read_parser]:
         if config is not None and "secret" in config and "engine" in config["secret"]:
             parser.add_argument(
                 "engine",
