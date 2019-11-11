@@ -31,7 +31,11 @@ class Secret:
         request = self.vault.requests_request(
             "LIST", address, headers=self.vault.token_header
         )
-        data = json.loads(request.content)["data"]["keys"]
+        try:
+            data = json.loads(request.content)["data"]["keys"]
+        except json.decoder.JSONDecodeError:
+            logging.error("Listing the secret %s lead to the following error:", path)
+            exit(1)
         return data
 
     def recursive_list(self, engine_path, path):
@@ -114,21 +118,31 @@ def delete(args, vault):
         return
     vault.secret.delete(args.engine, args.vaultpath)
 
+def list_secrets(args, vault):
+    """Run this module
+    :returns: None
+
+    """
+    secret_list = vault.secret.recursive_list(args.engine, args.vaultpath)
+    for secret in secret_list:
+        print(secret)
+
+
 
 def parse_commandline_arguments(subparsers, config):
     """ Commandline argument parser for this module
     :returns: None
 
     """
-    # TODO: make more secret based commands
-
     add_parser = subparsers.add_parser("secret-add")
     del_parser = subparsers.add_parser("secret-del")
+    list_parser = subparsers.add_parser("secret-list")
 
     add_parser.set_defaults(func=add)
     del_parser.set_defaults(func=delete)
+    list_parser.set_defaults(func=list_secrets)
 
-    for parser in [add_parser, del_parser]:
+    for parser in [add_parser, del_parser, list_parser]:
         if config is not None and "secret" in config and "engine" in config["secret"]:
             parser.add_argument(
                 "engine",
