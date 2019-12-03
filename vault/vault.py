@@ -104,7 +104,11 @@ class Vault:
         kwargs["verify"] = key_path
         logging.debug(kwargs)
         logging.debug(args)
-        response = requests.request(*args, **kwargs)
+        try:
+            response = requests.request(*args, **kwargs)
+        except Exception as error:
+            logging.error("An error occured during the connection to vault:\n\n %s \n", error)
+            exit(1)
         logging.debug("%s %s", response.status_code, response.reason)
         logging.debug(response.content)
         if response.status_code > 399:
