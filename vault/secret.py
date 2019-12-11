@@ -120,12 +120,10 @@ class Secret:
 
         :engine_path: path of the secret engine
         :from_path: path of the folders
-        to_path: path to move the folders
+        :to_path: path to move the folders
         :returns: None
 
         """
-        print("Original From Path:", from_path)
-        print("Original To Path:", to_path)
         if not from_path.endswith("/"):
             from_path = from_path + "/"
 
@@ -153,7 +151,6 @@ class Secret:
         secret_details = {}
         for version in versions:
             address = self.vault.vault_adress + "/v1" + path + "?version={}".format(version)
-            logging.info("Reading the secret: %s", address)
             response = self.vault.requests_request("GET", address, headers=self.vault.token_header)
             secret_details[version] = response.json()["data"]["data"]
             data = secret_details[version]
@@ -170,11 +167,8 @@ class Secret:
         """
         path = self.vault.normalize("/" + engine_path + "/metadata/" + path)
         address = self.vault.vault_adress + "/v1" + path
-        logging.info("Reading the secret: %s", address)
         response = self.vault.requests_request("GET", address, headers=self.vault.token_header)
-        secret_details = response.json()["data"]["versions"]
-        new_list = secret_details.keys()
-        return new_list
+        return response.json()["data"]["versions"].keys()
 
 
 def add(args, vault):
