@@ -23,6 +23,7 @@ import vault.export_to_html
 import vault.user
 import vault.secret
 import vault.totp
+import vault.policy
 import vault.import_from_csv
 from vault.vault import Vault
 
@@ -37,8 +38,12 @@ def main():
 
     config = read_config()
     args = get_commandline_arguments(config)
+    print(str(args))
     init_logging(args)
-    args.func(args, Vault(args.url, args.token))
+    try:
+        args.func(args, Vault(args.url, args.token))
+    except AttributeError:
+        args.help
 
 
 def get_commandline_arguments(config):
@@ -67,6 +72,7 @@ def get_commandline_arguments(config):
             vault.unwrap,
             vault.export_to_html,
             vault.import_from_csv,
+            vault.policy,
     ]:
         subcommand.parse_commandline_arguments(subparsers, config)
 

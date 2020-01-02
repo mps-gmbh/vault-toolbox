@@ -14,6 +14,7 @@ import requests
 from .secret import Secret
 from .totp import Totp
 from .user import User
+from .policy import Policy
 
 
 class Vault:
@@ -28,6 +29,7 @@ class Vault:
         self.secret = Secret(self)
         self.totp = Totp(self)
         self.user = User(self)
+        self.policy = Policy(self)
 
     def path_to_ui_link(self, engine_path, path):
         """ Generate a url from the given path
