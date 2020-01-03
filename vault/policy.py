@@ -65,8 +65,6 @@ class Policy:
         response = self.vault.requests_request(
             "POST", address, headers=self.vault.token_header, data=payload
         )
-        if response.json()["data"]["version"] != 1:
-            logging.warning("Policy already existed, creating new version with given data")
 
     def read(self, policy_name):
         """ read the details of the given policy
@@ -88,7 +86,9 @@ def add(args, vault):
     :returns: None
 
     """
-    vault.policy.add(args.policy_name, json.loads(args.data))
+    with open(args.datafile, 'r') as f:
+        data=f.read()
+        vault.policy.add(args.policy_name, data)
 
 
 def delete(args, vault):
@@ -139,4 +139,4 @@ def parse_commandline_arguments(subparsers, config):
             help="name of the policy",
         )
 
-    add_parser.add_argument("data", help="data of the policy as string")
+    add_parser.add_argument("datafile", help="filename containing policy data")
