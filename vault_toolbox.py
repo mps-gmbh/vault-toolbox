@@ -24,6 +24,7 @@ import vault.user
 import vault.secret
 import vault.totp
 import vault.policy
+import vault.group
 import vault.import_from_csv
 from vault.vault import Vault
 
@@ -73,6 +74,7 @@ def get_commandline_arguments(config):
             vault.export_to_html,
             vault.import_from_csv,
             vault.policy,
+            vault.group,
     ]:
         subcommand.parse_commandline_arguments(subparsers, config)
 
