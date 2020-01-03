@@ -15,6 +15,7 @@ from .secret import Secret
 from .totp import Totp
 from .user import User
 from .policy import Policy
+from .group import Group
 
 
 class Vault:
@@ -30,6 +31,7 @@ class Vault:
         self.totp = Totp(self)
         self.user = User(self)
         self.policy = Policy(self)
+        self.group = Group(self)
 
     def path_to_ui_link(self, engine_path, path):
         """ Generate a url from the given path
@@ -83,7 +85,6 @@ class Vault:
         """
         return "VAULT_ADDR=" + self.vault_adress + " ./vault_toolbox.py unwrap " + token
 
-
     @staticmethod
     def normalize(path):
         """Replace spaces with underscores, everything to lowercase, remove double
@@ -93,7 +94,6 @@ class Vault:
 
         """
         return path.replace(" ", "_").lower().replace("//", "/")
-
 
     @staticmethod
     def requests_request(*args, **kwargs):
