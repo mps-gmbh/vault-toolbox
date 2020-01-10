@@ -83,13 +83,13 @@ class Vault:
 
     @staticmethod
     def normalize(path):
-        """Replace spaces with underscores, everything to lowercase, remove double
+        """Replace spaces with underscores, remove double
         slashes
         :path: path to be normalized
         :returns: normalized string
 
         """
-        return path.replace(" ", "_").lower().replace("//", "/")
+        return path.replace(" ", "_").replace("//", "/")
 
     @staticmethod
     def requests_request(*args, **kwargs):
