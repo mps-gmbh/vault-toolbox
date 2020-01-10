@@ -6,10 +6,6 @@ Commanline interface for the vault toolbox.
 Wrapper around the vault api. This has no claim to be a full representation of
 the api but rather to provide convenience functions that are needed by MPS GmbH.
 However, extensions are most welcome.
-
-Author: Janosch Deurer
-Mail: deurer@mps-med.de
-
 """
 import logging
 import argparse
@@ -39,7 +35,6 @@ def main():
 
     config = read_config()
     args = get_commandline_arguments(config)
-    print(str(args))
     init_logging(args)
     try:
         args.func(args, Vault(args.url, args.token))

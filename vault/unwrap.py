@@ -1,10 +1,6 @@
 """
 This module adds a user, wrapps the password and returns a curl command with
 which the password can be retrieved once.
-
-Author: Janosch Deurer
-Mail: deurer@mps-med.de
-
 """
 def run(_, vault):
     """Run this module

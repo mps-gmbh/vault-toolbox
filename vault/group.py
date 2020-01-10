@@ -2,10 +2,6 @@
 Class for wrapping the group part of the vault api. This has no claim to be a
 full representation of the api but rather to provide convenience functions that
 are needed by MPS GmbH.  However, extensions are most welcome.
-
-Author: Janosch Deurer
-Mail: deurer@mps-med.de
-
 """
 import json
 import logging
@@ -13,15 +9,15 @@ import logging
 
 class Group:
 
-    """Class for wrapping the acl policies part of the vault api."""
+    """Class for wrapping the group part of the vault api."""
 
     def __init__(self, vault):
         self.vault = vault
 
     def list(self):
-        """ List all policies
+        """ List all groups
 
-        :returns: list of all policies
+        :returns: list of all groups
 
         """
         path = self.vault.normalize("/identity/group/name")
@@ -45,7 +41,6 @@ class Group:
         """
         path = self.vault.normalize("/identity/group/name" + group_name)
         address = self.vault.vault_adress + "/v1" + path
-        # Actually run vault
         logging.info("Deleting the group: %s", address)
         self.vault.requests_request("DELETE", address, headers=self.vault.token_header)
 
