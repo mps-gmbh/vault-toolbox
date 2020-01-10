@@ -1,8 +1,5 @@
 """
 This module takes a given csv keypass export and imports it in vault.
-
-Author: Janosch Deurer
-
 """
 import logging
 import csv

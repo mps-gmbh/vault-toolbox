@@ -2,10 +2,6 @@
 Class for wrapping the user part of the vault api. This has no claim to be a
 full representation of the api but rather to provide convenience functions that
 are needed by MPS GmbH.  However, extensions are most welcome.
-
-Author: Janosch Deurer
-Mail: deurer@mps-med.de
-
 """
 import json
 import logging

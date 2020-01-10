@@ -1,8 +1,5 @@
 """
 This module exports a given path in vault to html
-
-Author: Janosch Deurer
-
 """
 def run(args, vault):
     """Run this module

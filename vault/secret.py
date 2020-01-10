@@ -2,10 +2,6 @@
 Class for wrapping the secret part of the vault api. This has no claim to be a
 full representation of the api but rather to provide convenience functions that
 are needed by MPS GmbH.  However, extensions are most welcome.
-
-Author: Janosch Deurer
-Mail: deurer@mps-med.de
-
 """
 import json
 import logging
@@ -148,12 +144,10 @@ class Secret:
 
         versions = self._read_version(engine_path, from_path)
         path = self.vault.normalize("/" + engine_path + "/data/" + from_path)
-        secret_details = {}
         for version in versions:
             address = self.vault.vault_adress + "/v1" + path + "?version={}".format(version)
             response = self.vault.requests_request("GET", address, headers=self.vault.token_header)
-            secret_details[version] = response.json()["data"]["data"]
-            data = secret_details[version]
+            data = response.json()["data"]["data"]
             self.add(engine_path, to_path, data)
         self.delete(engine_path, from_path)
 
