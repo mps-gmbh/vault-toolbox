@@ -5,6 +5,7 @@ are needed by MPS GmbH.  However, extensions are most welcome.
 """
 import json
 import logging
+import os
 
 
 class Policy:
@@ -71,7 +72,7 @@ class Policy:
         """
         path = self.vault.normalize("/sys/policies/acl/" + policy_name)
         address = self.vault.vault_adress + "/v1" + path
-        logging.info("Reading the policy: %s", address)
+        logging.debug("Reading the policy: %s", address)
         response = self.vault.requests_request("GET", address, headers=self.vault.token_header)
         policy_details = response.json()["data"]["policy"]
         return policy_details
@@ -83,7 +84,7 @@ def add(args, vault):
 
     """
     with open(args.datafile, 'r') as f:
-        data=f.read()
+        data = f.read()
         vault.policy.add(args.policy_name, data)
 
 
@@ -114,6 +115,57 @@ def read(args, vault):
     print(policy_details)
 
 
+def export(args, vault):
+    """Run this module
+    :returns: None
+
+    """
+    for policy in vault.policy.list():
+        policy_details = vault.policy.read(policy)
+        if not os.path.isdir(args.dir):
+            os.mkdir(args.dir)
+        policy_file = os.path.join(args.dir, policy + ".hcl")
+        with open(policy_file, 'w') as f:
+            f.write(policy_details)
+
+
+def policy_import(args, vault):
+    """Run this module
+    :returns: None
+
+    """
+    for policy_file in os.listdir(args.dir):
+        if not policy_file.endswith(".hcl"):
+            continue
+        filepath = os.path.join(args.dir, policy_file)
+        with open(filepath, 'r') as f:
+            policy_details = f.read()
+        # Ignore empty policies
+        if not policy_details:
+            continue
+        # Remove file extension to generate policy name
+        policy_name = os.path.splitext(policy_file)[0]
+        vault.policy.add(policy_name, policy_details)
+
+    delete_policies = []
+    for policy in vault.policy.list():
+        if policy + ".hcl" not in os.listdir(args.dir):
+            delete_policies.append(policy)
+
+    if delete_policies:
+        print("The following policies will be DELETED:")
+        for policy in delete_policies:
+            print(policy)
+        user_input = input("If you want to continue type yes: ")
+        if user_input != "yes":
+            print("Aborting deletion")
+            return
+        for policy in delete_policies:
+            vault.policy.delete(policy)
+
+
+
+
 def parse_commandline_arguments(subparsers, config):
     """ Commandline argument parser for this module
     :returns: None
@@ -123,11 +175,15 @@ def parse_commandline_arguments(subparsers, config):
     del_parser = subparsers.add_parser("policy-del")
     list_parser = subparsers.add_parser("policy-list")
     read_parser = subparsers.add_parser("policy-read")
+    export_parser = subparsers.add_parser("policy-export")
+    import_parser = subparsers.add_parser("policy-import")
 
     add_parser.set_defaults(func=add)
     del_parser.set_defaults(func=delete)
     list_parser.set_defaults(func=list_policys)
     read_parser.set_defaults(func=read)
+    export_parser.set_defaults(func=export)
+    import_parser.set_defaults(func=policy_import)
 
     for parser in [add_parser, del_parser, read_parser]:
         parser.add_argument(
@@ -136,3 +192,5 @@ def parse_commandline_arguments(subparsers, config):
         )
 
     add_parser.add_argument("datafile", help="filename containing policy data")
+    for parser in [import_parser, export_parser]:
+        parser.add_argument("dir", help="directory for the policies")
