@@ -89,7 +89,8 @@ class Vault:
         :returns: normalized string
 
         """
-        return path.replace(" ", "_").replace("//", "/")
+        # TODO: fix this
+        return path.replace(" ", "%20").replace("//", "/")
 
     @staticmethod
     def requests_request(*args, **kwargs):
