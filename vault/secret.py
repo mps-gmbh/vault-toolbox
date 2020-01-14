@@ -211,7 +211,7 @@ def mv(args, vault):
     if args.recursive:
         vault.secret.recursive_mv(args.engine, args.vaultpath, args.target_vaultpath)
         return
-    vault.secret.recursive_mv(args.engine, args.vaultpath, args.target_vaultpath)
+    vault.secret.mv(args.engine, args.vaultpath, args.target_vaultpath)
 
 
 def parse_commandline_arguments(subparsers, config):
