@@ -90,7 +90,6 @@ class Vault:
         :returns: normalized string
 
         """
-        # TODO: fix this
         return path.replace(" ", "%20").replace("//", "/")
 
     @staticmethod
@@ -106,7 +105,7 @@ class Vault:
         logging.debug(args)
         try:
             response = requests.request(*args, **kwargs)
-        except Exception as error:
+        except Exception as error:  # pylint: disable=broad-except
             logging.error(
                 "An error occured during the connection to vault:\n\n %s \n", error
             )

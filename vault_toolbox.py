@@ -40,7 +40,7 @@ def main():
     try:
         args.func(args, Vault(args.url, args.token))
     except AttributeError:
-        args.help
+        print(args.help)
 
 
 def get_commandline_arguments(config):
