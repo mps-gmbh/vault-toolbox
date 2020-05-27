@@ -11,4 +11,5 @@
     "python.linting.flake8Enabled": true,
     "python.linting.pylintPath": "env-test/bin/pylint",
     "python.linting.pylintUseMinimalCheckers": false,
+    "python.linting.pylintEnabled": true,
 }
