@@ -1,0 +1,14 @@
+{
+    "python.formatting.provider": "black",
+    "editor.formatOnPaste": false,
+    "editor.formatOnType": false,
+    "editor.formatOnSave": true,
+    "editor.formatOnSaveTimeout": 3000,
+    "files.autoSave": "afterDelay",
+    "files.autoSaveDelay": 10000,
+    "python.pythonPath": "env-test/bin/python",
+    "python.linting.enabled": true,
+    "python.linting.flake8Enabled": true,
+    "python.linting.pylintPath": "env-test/bin/pylint",
+    "python.linting.pylintUseMinimalCheckers": false,
+}
