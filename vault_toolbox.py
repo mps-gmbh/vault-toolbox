@@ -10,6 +10,7 @@ However, extensions are most welcome.
 import logging
 import argparse
 import yaml
+
 try:
     import argcomplete
 except ImportError:
@@ -57,38 +58,44 @@ def get_commandline_arguments(config):
         "-q", "--quiet", help="no output except errors", action="store_true"
     )
     # Add parsers for subcommand
-    subparsers = parser.add_subparsers(
-        help="subcommand", dest="subcommand"
-    )
+    subparsers = parser.add_subparsers(help="subcommand", dest="subcommand")
 
     for subcommand in [
-            vault.secret,
-            vault.user,
-            vault.totp,
-            vault.unwrap,
-            vault.export_to_html,
-            vault.import_from_csv,
-            vault.policy,
-            vault.group,
+        vault.secret,
+        vault.user,
+        vault.totp,
+        vault.unwrap,
+        vault.export_to_html,
+        vault.import_from_csv,
+        vault.policy,
+        vault.group,
     ]:
         subcommand.parse_commandline_arguments(subparsers, config)
 
     for _, subparser in subparsers.choices.items():
         if config is not None and "token" in config:
-            subparser.add_argument("token", nargs='?', default=config["token"],
-                                   help="Vault token, if not provided, " + \
-                                   "the token from the config will be used")
+            subparser.add_argument(
+                "token",
+                nargs="?",
+                default=config["token"],
+                help="Vault token, if not provided, "
+                + "the token from the config will be used",
+            )
         else:
             subparser.add_argument("token", help="Vault token")
 
         if config is not None and "url" in config:
-            subparser.add_argument("url", nargs='?', default=config["url"],
-                                   help="Url of vault server, if not provided, " + \
-                                   "the url from the config will be used")
+            subparser.add_argument(
+                "url",
+                nargs="?",
+                default=config["url"],
+                help="Url of vault server, if not provided, "
+                + "the url from the config will be used",
+            )
         else:
             subparser.add_argument("url", help="Url of vault server")
 
-    if 'argcomplete' in globals():
+    if "argcomplete" in globals():
         argcomplete.autocomplete(parser)
     args = parser.parse_args()
     return args
@@ -123,6 +130,7 @@ def init_logging(commandline_args):
     loglevel = getattr(logging, loglevel.upper())
     logging.getLogger().setLevel(loglevel)
 
+
 def read_config():
     """Parses config and returns config values
     :returns: config as dict
@@ -141,6 +149,7 @@ def read_config():
         config["url"] = config["url"].rstrip("/")
 
     return config
+
 
 if __name__ == "__main__":
     main()

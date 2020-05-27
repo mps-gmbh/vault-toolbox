@@ -6,13 +6,13 @@ are needed by MPS GmbH.  However, extensions are most welcome.
 import json
 import logging
 
+
 class Totp:
 
     """Class for wrapping the secret part of the vault api."""
 
     def __init__(self, vault):
         self.vault = vault
-
 
     def list(self, engine_path):
         """ List secrets on a given path
@@ -24,10 +24,11 @@ class Totp:
         path = self.vault.normalize("/" + engine_path + "/keys")
         # TODO: replace with urlparse everywhere
         address = self.vault.vault_adress + "/v1" + path
-        request = self.vault.requests_request("LIST", address, headers=self.vault.token_header)
+        request = self.vault.requests_request(
+            "LIST", address, headers=self.vault.token_header
+        )
         data = json.loads(request.content)["data"]["keys"]
         return data
-
 
     def delete(self, engine_path, name):
         """ Delete the given totp permanently from vault
@@ -60,8 +61,9 @@ class Totp:
         payload_dict["issuer"] = issuer
         payload_dict["account_name"] = account
         payload = json.dumps(payload_dict)
-        self.vault.requests_request("POST", address, headers=self.vault.token_header,
-                                    data=payload)
+        self.vault.requests_request(
+            "POST", address, headers=self.vault.token_header, data=payload
+        )
 
     def read(self, engine_path, name):
         """ Read a value from the given totp key
@@ -73,7 +75,9 @@ class Totp:
         """
         path = self.vault.normalize("/" + engine_path + "/code/" + name)
         address = self.vault.vault_adress + "/v1" + path
-        response = self.vault.requests_request("GET", address, headers=self.vault.token_header)
+        response = self.vault.requests_request(
+            "GET", address, headers=self.vault.token_header
+        )
         data = json.loads(response.content)["data"]["code"]
         return data
 
@@ -93,8 +97,9 @@ class Totp:
         payload_dict["generate"] = False
         payload_dict["url"] = totp_url
         payload = json.dumps(payload_dict)
-        self.vault.requests_request("POST", address, headers=self.vault.token_header,
-                                    data=payload)
+        self.vault.requests_request(
+            "POST", address, headers=self.vault.token_header, data=payload
+        )
 
 
 def add(args, vault):
@@ -105,6 +110,7 @@ def add(args, vault):
 
     """
     vault.totp.add(args.engine, args.name, args.issuer, args.account)
+
 
 def list_totp(args, vault):
     """Run list operation
@@ -119,6 +125,7 @@ def list_totp(args, vault):
     for key in keys:
         print(key)
 
+
 def read(args, vault):
     """Run read operation
 
@@ -131,6 +138,7 @@ def read(args, vault):
     print("## Value for secret " + args.name)
     print(key)
 
+
 def delete(args, vault):
     """Run delete operation
 
@@ -140,6 +148,7 @@ def delete(args, vault):
 
     """
     vault.totp.delete(args.engine, args.name)
+
 
 def totp_import(args, vault):
     """Run import operation
@@ -162,7 +171,6 @@ def parse_commandline_arguments(subparsers, config):
     read_parser = subparsers.add_parser("totp-read")
     del_parser = subparsers.add_parser("totp-del")
     import_parser = subparsers.add_parser("totp-import")
-
 
     add_parser.set_defaults(func=add)
     list_parser.set_defaults(func=list_totp)

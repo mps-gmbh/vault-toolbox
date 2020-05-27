@@ -30,7 +30,9 @@ class Secret:
         try:
             data = json.loads(request.content)["data"]["keys"]
         except json.decoder.JSONDecodeError:
-            logging.exception("Listing the secret %s lead to the following error:", path)
+            logging.exception(
+                "Listing the secret %s lead to the following error:", path
+            )
             exit(1)
         return data
 
@@ -82,7 +84,9 @@ class Secret:
             "POST", address, headers=self.vault.token_header, data=payload
         )
         if response.json()["data"]["version"] != 1:
-            logging.warning("Secret already existed, creating new version with given data")
+            logging.warning(
+                "Secret already existed, creating new version with given data"
+            )
 
     def recursive_delete(self, engine_path, path):
         """ Delete all secrets under the given path permanently from vault
@@ -107,7 +111,9 @@ class Secret:
         path = self.vault.normalize("/" + engine_path + "/data/" + path)
         address = self.vault.vault_adress + "/v1" + path
         logging.info("Reading the secret: %s", address)
-        response = self.vault.requests_request("GET", address, headers=self.vault.token_header)
+        response = self.vault.requests_request(
+            "GET", address, headers=self.vault.token_header
+        )
         secret_details = response.json()["data"]["data"]
         return secret_details
 
@@ -145,8 +151,12 @@ class Secret:
         versions = self._read_version(engine_path, from_path)
         path = self.vault.normalize("/" + engine_path + "/data/" + from_path)
         for version in versions:
-            address = self.vault.vault_adress + "/v1" + path + "?version={}".format(version)
-            response = self.vault.requests_request("GET", address, headers=self.vault.token_header)
+            address = (
+                self.vault.vault_adress + "/v1" + path + "?version={}".format(version)
+            )
+            response = self.vault.requests_request(
+                "GET", address, headers=self.vault.token_header
+            )
             data = response.json()["data"]["data"]
             self.add(engine_path, to_path, data)
         self.delete(engine_path, from_path)
@@ -161,7 +171,9 @@ class Secret:
         """
         path = self.vault.normalize("/" + engine_path + "/metadata/" + path)
         address = self.vault.vault_adress + "/v1" + path
-        response = self.vault.requests_request("GET", address, headers=self.vault.token_header)
+        response = self.vault.requests_request(
+            "GET", address, headers=self.vault.token_header
+        )
         return response.json()["data"]["versions"].keys()
 
 
@@ -245,8 +257,7 @@ def parse_commandline_arguments(subparsers, config):
             parser.add_argument("engine", help="path of the secret engine in vault")
 
         parser.add_argument(
-            "vaultpath",
-            help="path of the secret inside the secret engine vault",
+            "vaultpath", help="path of the secret inside the secret engine vault"
         )
 
     mv_parser.add_argument("target_vaultpath", help="path to move the secret to")

@@ -29,10 +29,11 @@ class Policy:
         try:
             data = json.loads(request.content)["data"]["keys"]
         except json.decoder.JSONDecodeError:
-            logging.exception("Listing the policy %s lead to the following error:", path)
+            logging.exception(
+                "Listing the policy %s lead to the following error:", path
+            )
             exit(1)
         return data
-
 
     def delete(self, policy_name):
         """ Delete the given policy permanently from vault
@@ -73,7 +74,9 @@ class Policy:
         path = self.vault.normalize("/sys/policies/acl/" + policy_name)
         address = self.vault.vault_adress + "/v1" + path
         logging.debug("Reading the policy: %s", address)
-        response = self.vault.requests_request("GET", address, headers=self.vault.token_header)
+        response = self.vault.requests_request(
+            "GET", address, headers=self.vault.token_header
+        )
         policy_details = response.json()["data"]["policy"]
         return policy_details
 
@@ -83,7 +86,7 @@ def add(args, vault):
     :returns: None
 
     """
-    with open(args.datafile, 'r') as f:
+    with open(args.datafile, "r") as f:
         data = f.read()
         vault.policy.add(args.policy_name, data)
 
@@ -125,7 +128,7 @@ def export(args, vault):
         if not os.path.isdir(args.dir):
             os.mkdir(args.dir)
         policy_file = os.path.join(args.dir, policy + ".hcl")
-        with open(policy_file, 'w') as f:
+        with open(policy_file, "w") as f:
             f.write(policy_details)
 
 
@@ -138,7 +141,7 @@ def policy_import(args, vault):
         if not policy_file.endswith(".hcl"):
             continue
         filepath = os.path.join(args.dir, policy_file)
-        with open(filepath, 'r') as f:
+        with open(filepath, "r") as f:
             policy_details = f.read()
         # Ignore empty policies
         if not policy_details:
@@ -164,8 +167,6 @@ def policy_import(args, vault):
             vault.policy.delete(policy)
 
 
-
-
 def parse_commandline_arguments(subparsers, config):
     """ Commandline argument parser for this module
     :returns: None
@@ -186,10 +187,7 @@ def parse_commandline_arguments(subparsers, config):
     import_parser.set_defaults(func=policy_import)
 
     for parser in [add_parser, del_parser, read_parser]:
-        parser.add_argument(
-            "policy_name",
-            help="name of the policy",
-        )
+        parser.add_argument("policy_name", help="name of the policy")
 
     add_parser.add_argument("datafile", help="filename containing policy data")
     for parser in [import_parser, export_parser]:

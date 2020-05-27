@@ -17,6 +17,7 @@ from .group import Group
 class Vault:
 
     """Class for wrapping the vault http api. """
+
     def __init__(self, vault_adress, token):
         self.vault_adress = vault_adress
         self.token = token
@@ -106,13 +107,15 @@ class Vault:
         try:
             response = requests.request(*args, **kwargs)
         except Exception as error:
-            logging.error("An error occured during the connection to vault:\n\n %s \n", error)
+            logging.error(
+                "An error occured during the connection to vault:\n\n %s \n", error
+            )
             exit(1)
         logging.debug("%s %s", response.status_code, response.reason)
         logging.debug(response.content)
         if response.status_code > 399:
             logging.error("%s %s", response.status_code, response.reason)
-            error_text = "\n".join(response.json()['errors'])
+            error_text = "\n".join(response.json()["errors"])
             if error_text:
                 logging.error(error_text)
             exit(1)

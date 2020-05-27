@@ -1,6 +1,8 @@
 """
 This module exports a given path in vault to html
 """
+
+
 def run(args, vault):
     """Run this module
     :returns: None
@@ -36,12 +38,14 @@ def html_link(text, url):
     """
     return '<a href="' + url + '">' + text + "</a>"
 
+
 def html_list_element(content):
     """Creates an html list element from the given content
     :returns: html list element as string
 
     """
     return "<li>" + content + "</li>"
+
 
 def parse_commandline_arguments(subparsers, config):
     """ Commandline argument parser for this module

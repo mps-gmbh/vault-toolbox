@@ -8,6 +8,7 @@ import logging
 import random
 import string
 
+
 class User:
 
     """Class for wrapping the user part of the vault api."""
@@ -55,7 +56,9 @@ class User:
         address = self.vault.vault_adress + "/v1/auth/userpass/users/" + username
         data = json.dumps({"password": password})
         logging.info("Creating userpass login for: %s", username)
-        self.vault.requests_request("POST", address, headers=self.vault.token_header, data=data)
+        self.vault.requests_request(
+            "POST", address, headers=self.vault.token_header, data=data
+        )
         return password
 
     def _add_entity(self, data):
@@ -97,7 +100,9 @@ class User:
         """
         # Get mount accessor of userpass
         address = self.vault.vault_adress + "/v1/sys/auth"
-        request = self.vault.requests_request("GET", address, headers=self.vault.token_header)
+        request = self.vault.requests_request(
+            "GET", address, headers=self.vault.token_header
+        )
         userpass_accessor = json.loads(request.content)["userpass/"]["accessor"]
 
         # Add the user in vault
@@ -137,7 +142,9 @@ class User:
 
         """
         address = self.vault.vault_adress + "/v1/auth/userpass/users"
-        request = self.vault.requests_request("LIST", address, headers=self.vault.token_header)
+        request = self.vault.requests_request(
+            "LIST", address, headers=self.vault.token_header
+        )
         return json.loads(request.content)["data"]["keys"]
 
     def get_entities(self):
@@ -146,11 +153,12 @@ class User:
 
         """
         address = self.vault.vault_adress + "/v1/identity/entity/name"
-        request = self.vault.requests_request("LIST", address, headers=self.vault.token_header)
+        request = self.vault.requests_request(
+            "LIST", address, headers=self.vault.token_header
+        )
         entity_names = json.loads(request.content)["data"]["keys"]
         for name in entity_names:
             yield self.get_entity_by_name(name)
-
 
     def get_entity_by_name(self, name):
         """Resolve entity name to full entity information
@@ -160,12 +168,13 @@ class User:
 
         """
         address = self.vault.vault_adress + "/v1/identity/entity/name/" + name
-        request = self.vault.requests_request("GET", address, headers=self.vault.token_header)
+        request = self.vault.requests_request(
+            "GET", address, headers=self.vault.token_header
+        )
         # If user does not exist return None
         if request.status_code == 404:
             return None
         return json.loads(request.content)["data"]
-
 
     def _get_entity_id(self, user):
         """Get id for the given user
@@ -173,10 +182,10 @@ class User:
 
         """
         address = self.vault.vault_adress + "/v1/identity/entity/name/" + user
-        request = self.vault.requests_request("GET", address, headers=self.vault.token_header)
+        request = self.vault.requests_request(
+            "GET", address, headers=self.vault.token_header
+        )
         return json.loads(request.content)["data"]["id"]
-
-
 
 
 def add(args, vault):
@@ -189,6 +198,7 @@ def add(args, vault):
     unwrap = vault.unwrap_str(token)
     print(unwrap)
 
+
 def delete(args, vault):
     """Run delte subcommand
     :returns: None
@@ -196,10 +206,12 @@ def delete(args, vault):
     """
     user = vault.user.get_entity_by_name(args.user)
     if user is None:
-        logging.error("The user '%s' does not exist, %s%s",
-                      args.user,
-                      "please choose one of the following users:\n\n",
-                      "\n".join([entity["name"] for entity in vault.user.get_entities()]))
+        logging.error(
+            "The user '%s' does not exist, %s%s",
+            args.user,
+            "please choose one of the following users:\n\n",
+            "\n".join([entity["name"] for entity in vault.user.get_entities()]),
+        )
         exit(1)
     aliases = user["aliases"]
     for alias in aliases:
@@ -207,6 +219,7 @@ def delete(args, vault):
         vault.user.del_userpass_user(alias["name"])
     logging.info("Deleting entity %s", args.user)
     vault.user.del_entity(args.user)
+
 
 def list_user(_, vault):
     """Entrypoint when used as an executable
@@ -219,7 +232,6 @@ def list_user(_, vault):
     for user in users:
         print(user)
 
-
     print("\n## Entities:\n")
     users = vault.user.get_entities()
     for user in users:
@@ -228,9 +240,11 @@ def list_user(_, vault):
     print("\n## Entity aliases:\n")
     users = vault.user.get_entities()
     for user in users:
-        print(user["name"] + " -> aliases:" + str([alias["name"] for alias in user["aliases"]]))
-
-
+        print(
+            user["name"]
+            + " -> aliases:"
+            + str([alias["name"] for alias in user["aliases"]])
+        )
 
 
 def parse_commandline_arguments(subparsers, config):
@@ -260,6 +274,5 @@ def parse_commandline_arguments(subparsers, config):
         )
     else:
         add_parser.add_argument("organization", help="organization of the user")
-
 
     del_parser.add_argument("user", help="Vault user to delete")

@@ -70,7 +70,9 @@ class Group:
         """
         path = self.vault.normalize("/identity/group/name/" + group_name)
         address = self.vault.vault_adress + "/v1" + path
-        response = self.vault.requests_request("GET", address, headers=self.vault.token_header)
+        response = self.vault.requests_request(
+            "GET", address, headers=self.vault.token_header
+        )
         group_details = response.json()["data"]
         return group_details
 
@@ -127,8 +129,6 @@ class Group:
                 self.delete(group)
 
 
-
-
 def add(args, vault):
     """Run this module
     :returns: None
@@ -161,7 +161,7 @@ def read(args, vault):
 
     """
     print("Policies of " + args.group_name + ":")
-    for policy in vault.group.read(args.group_name)['policies']:
+    for policy in vault.group.read(args.group_name)["policies"]:
         print(policy)
 
 
@@ -178,7 +178,7 @@ def yaml_import(args, vault):
     :returns: None
 
     """
-    with open(args.datafile, 'r') as f:
+    with open(args.datafile, "r") as f:
         data = f.read()
     vault.group.yaml_import(data)
 
@@ -203,8 +203,5 @@ def parse_commandline_arguments(subparsers, config):
     yaml_import_parser.set_defaults(func=yaml_import)
 
     for parser in [add_parser, del_parser, read_parser]:
-        parser.add_argument(
-            "group_name",
-            help="name of the group",
-        )
+        parser.add_argument("group_name", help="name of the group")
     yaml_import_parser.add_argument("datafile", help="filename containing group data")

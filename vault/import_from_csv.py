@@ -42,13 +42,7 @@ def run(args, vault):
         # Strip the common leading path
         group = re.sub(r"^" + leading_path, "", row["Group"])
         # Remove spaces and double slashes
-        path = normalize(
-            args.vaultpath
-            + "/"
-            + group
-            + "/"
-            + row["Title"]
-        )
+        path = normalize(args.vaultpath + "/" + group + "/" + row["Title"])
         del row["Group"]
         del row["Title"]
         # Delete empty rows
