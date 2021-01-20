@@ -80,7 +80,7 @@ class Vault:
         :token: token to unwrap
         :returns: unwrap commandline
         """
-        return "VAULT_ADDR=" + self.vault_adress + " ./vault_toolbox.py unwrap " + token
+        return f"./vault_toolbox.py unwrap {token} {self.vault_adress}"
 
     @staticmethod
     def normalize(path):

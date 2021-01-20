@@ -196,7 +196,7 @@ def add(args, vault):
     password = vault.user.add(args.firstname, args.lastname, args.organization)
     token = vault.wrap({"password": password})
     unwrap = vault.unwrap_str(token)
-    print(unwrap)
+    print(f"Run the following command to retrieve the password: '{unwrap}'" )
 
 
 def delete(args, vault):
