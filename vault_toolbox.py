@@ -24,6 +24,7 @@ import vault.policy
 import vault.group
 import vault.import_from_csv
 from vault.vault import Vault
+import os
 
 
 def main():
@@ -135,8 +136,10 @@ def read_config():
     """Parses config and returns config values
     :returns: config as dict
     """
+    dirname = os.path.dirname(__file__)
+    config_path = os.path.join(dirname, 'config.yaml')
     try:
-        stream = open("config.yaml", "r")
+        stream = open(config_path, "r")
     except FileNotFoundError:
         return None
     try:
