@@ -99,9 +99,6 @@ class Vault:
         :returns: requests method
 
         """
-        dirname = os.path.dirname(__file__)
-        key_path = os.path.join(dirname, "ca_bundle.crt")
-        kwargs["verify"] = key_path
         logging.debug(kwargs)
         logging.debug(args)
         try:
